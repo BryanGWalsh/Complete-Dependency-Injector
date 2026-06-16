@@ -1,0 +1,1 @@
+typedef DependenciesBuilderViewModelUpdateViewModelPropertiesFromStreamLatestValuesFn = void Function(List<dynamic> streamLatestValues);

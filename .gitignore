@@ -1,0 +1,76 @@
+# https://dart.dev/guides/libraries/private-files
+
+# Files and directories created by pub
+**/.dart_tool/
+**/.packages
+**/.pub-cache/
+**/.pub/
+
+# Conventional directory for build outputs
+**/build/
+
+# Coverage
+**/coverage/
+
+# Android-specific files
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradle/
+**/android/local.properties
+**/android/native-libs/
+**/android/sdk-manager.properties
+**/android/app/src/main/res/values/strings.xml
+
+# iOS-specific files
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets.zip
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.h
+**/ios/Runner/GeneratedPluginRegistrant.m
+**/DerivedData/
+**/.ls-cache/
+
+# macOS-specific files
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/Generated.xcconfig
+**/macos/Flutter/flutter_export_environment.sh
+**/macos/Runner/GeneratedPluginRegistrant.swift
+
+# Linux-specific files
+**/linux/flutter/ephemeral/
+
+# Windows-specific files
+**/windows/flutter/ephemeral/
+
+# IntelliJ-specific files
+**/.idea/
+**/*.iml
+**/*.iws
+**/.idea/modules.xml
+**/.idea/libraries/
+**/.idea/runConfigurations/
+**/.idea/workspace.xml
+
+# VS Code-specific files
+**/.vscode/
+**/.history/
+**/*.code-workspace
+
+# System-specific files
+**/.DS_Store
+**/Thumbs.db
+
+# Example platform runners
+**/example/android/
+**/example/ios/
+**/example/macos/
+**/example/linux/
+**/example/windows/
+**/example/web/

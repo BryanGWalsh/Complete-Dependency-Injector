@@ -1,0 +1,1 @@
+export "injectable_factory_class.dart";

@@ -1,0 +1,3 @@
+import 'package:complete_dependency_injector/complete_dependency_injector.dart';
+
+typedef DependenciesBuilderViewModelSetPropertiesFromInjectedDependenciesFn = void Function(Dependencies dependenciesDataSnapshot);

@@ -1,0 +1,9 @@
+name: complete_dependency_injector_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.8.1
+
+workspace:
+  - complete_dependency_injector
+  - complete_dependency_injector_flutter

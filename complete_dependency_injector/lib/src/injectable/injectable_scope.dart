@@ -1,0 +1,4 @@
+enum InjectableScope{
+  root,
+  instance
+}
