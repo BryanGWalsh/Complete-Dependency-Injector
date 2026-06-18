@@ -1,7 +1,7 @@
 name: complete_dependency_injector_flutter
 description: Flutter extensions for complete_dependency_injector, including a lightweight, non-opinionated state management solution.
 version: 1.0.0
-repository: https://github.com/Transparent-Tech-Consulting/Complete-Dependency-Injector
+repository: https://github.com/BryanGWalsh/Complete-Dependency-Injector
 
 environment:
   sdk: ^3.8.1
