@@ -34,7 +34,7 @@ class DependencyData {
 }
 
 enum DependencyMapType {
-  Positional,
-  NamedRequired,
-  NamedOptional,
+  positional,
+  namedRequired,
+  namedOptional,
 }

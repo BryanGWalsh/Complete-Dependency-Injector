@@ -11,13 +11,13 @@ class DependencyListBuilderDependencyMapsUtil {
     Map<String, Dependency> targetMap;
     String addTypeErrorMessage;
     switch (type) {
-      case DependencyMapType.Positional:
+      case DependencyMapType.positional:
       targetMap = data.positional;
       addTypeErrorMessage = "Positional dependency list already contains entry for ";
-      case DependencyMapType.NamedRequired:
+      case DependencyMapType.namedRequired:
       targetMap = data.named;
       addTypeErrorMessage = "Named dependency list already contains entry for ";
-      case DependencyMapType.NamedOptional:
+      case DependencyMapType.namedOptional:
       targetMap = data.named;
       addTypeErrorMessage = "Named dependency list already contains entry for ";
     }
@@ -31,9 +31,9 @@ class DependencyListBuilderDependencyMapsUtil {
     data.all.addAll(map);
   }
 
-  void addNamedOptional(Iterable<Dependency> dependencies) => _addToMap(dependencies, DependencyMapType.NamedOptional);
-  void addNamedRequired(Iterable<Dependency> dependencies) => _addToMap(dependencies, DependencyMapType.NamedRequired);
-  void addPositional(Iterable<Dependency> dependencies) => _addToMap(dependencies, DependencyMapType.Positional);
+  void addNamedOptional(Iterable<Dependency> dependencies) => _addToMap(dependencies, DependencyMapType.namedOptional);
+  void addNamedRequired(Iterable<Dependency> dependencies) => _addToMap(dependencies, DependencyMapType.namedRequired);
+  void addPositional(Iterable<Dependency> dependencies) => _addToMap(dependencies, DependencyMapType.positional);
 }
 
 
