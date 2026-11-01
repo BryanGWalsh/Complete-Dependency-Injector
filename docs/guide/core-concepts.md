@@ -8,7 +8,7 @@ An `Injector` holds a list of providers and caches the instances it creates. Inj
 
 ## Providers: what is available
 
-A provider maps a **token** to a way of getting a value. Usually the token is a class type.
+A provider maps a **token** to a way of getting a value. Usually the token is a class type. Services carry their usual provider as a static `DefaultProvider` (see [the convention below](#recommended-convention)); one-off values are written inline.
 
 <<< @/snippets/lib/core_concepts.dart#providers{dart}
 
@@ -26,6 +26,8 @@ Every provider also accepts `aliasTokens`, a list of extra tokens that resolve t
 A factory describes how to construct one type: what it depends on, and the function that builds it. Factories are registered once and shared by every injector in the hierarchy.
 
 <<< @/snippets/lib/core_concepts.dart#factories{dart}
+
+Each service exposes its factory as a static `Factory`, so registration is just a list.
 
 - `InjectableFactory.withoutDependencies<T>(() => ...)` is for types with no dependencies.
 - `InjectableFactory.withDependencies<T>(dependencyData, (deps) => ...)` declares dependencies with a `DependencyDataBuilder`. The injector resolves them first and passes them in as `deps`.
@@ -47,9 +49,30 @@ Each factory has an `InjectableScope`:
 - `InjectableScope.root` (the default) caches the instance in the root injector, so the whole app shares one.
 - `InjectableScope.instance` caches the instance in the injector that provides it. Two child injectors that both provide the type each get their own.
 
+<<< @/snippets/lib/core_concepts.dart#instance-scope{dart}
+
 <<< @/snippets/lib/core_concepts.dart#hierarchy{dart}
 
 In Flutter, this is how you give each screen its own state while sharing app-wide services.
+
+## Recommended convention
+
+Give every service a static `Factory` and `DefaultProvider`, built with the `InjectableFactory` and `Provider` helpers:
+
+<<< @/snippets/lib/core_concepts.dart#convention{dart}
+
+Then registration never contains construction logic:
+
+```dart
+injector.registerFactories([ApiClient.Factory, SessionState.Factory]);
+final child = Injector([SessionState.DefaultProvider], parent: injector);
+```
+
+This keeps everything about a service in one file. For an interface, put the `DefaultProvider` on the interface and the `Factory` on the implementation:
+
+<<< @/snippets/lib/core_concepts.dart#interface{dart}
+
+The member is called `DefaultProvider` rather than `Provider` because a static named `Provider` would hide the `Provider` class inside the service. "Default" also signals that a different provider, such as a `Provider.value` fake in a test, can replace it.
 
 ## Lifecycle
 
