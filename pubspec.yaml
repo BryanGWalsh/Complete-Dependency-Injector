@@ -7,3 +7,4 @@ environment:
 workspace:
   - complete_dependency_injector
   - complete_dependency_injector_flutter
+  - docs/snippets

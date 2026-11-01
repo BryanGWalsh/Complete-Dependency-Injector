@@ -1,0 +1,72 @@
+name: Docs site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get workspace packages
+        run: flutter pub get
+
+      # Doc code samples live in docs/snippets so they are compiled and tested.
+      - name: Analyze and test doc snippets
+        working-directory: docs/snippets
+        run: |
+          dart analyze --fatal-infos
+          dart test
+
+      - name: Generate core API reference
+        working-directory: complete_dependency_injector
+        run: dart doc --output ../docs/public/api/core
+
+      - name: Generate Flutter API reference
+        working-directory: complete_dependency_injector_flutter
+        run: dart doc --output ../docs/public/api/flutter
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Build site
+        working-directory: docs
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
