@@ -22,7 +22,7 @@ class DependencyData {
     return _positionalSorted!;
   }
 
-  DependencyData({safety = true}) : _safety = safety;
+  DependencyData({bool safety = true}) : _safety = safety;
 
   bool isSet(DependencyMapType type) => _setMapTypes.contains(type);
 

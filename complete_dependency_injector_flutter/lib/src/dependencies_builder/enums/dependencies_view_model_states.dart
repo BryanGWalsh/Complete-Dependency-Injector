@@ -1,10 +1,10 @@
 enum DependenciesBuilderViewModelStates{
-  NewNotInitialized,
-  ResolvingDependencies,
-  ResolvedDependencies,
-  WaitingForInitialStreamSnapshots,
-  ReadyForConsumption,
-  GeneralError,
+  newNotInitialized,
+  resolvingDependencies,
+  resolvedDependencies,
+  waitingForInitialStreamSnapshots,
+  readyForConsumption,
+  generalError,
   /*
   DependencyResolutionError,
   StreamProjectionFunctionError,
