@@ -1,0 +1,15 @@
+name: complete_dependency_injector_docs_snippets
+description: Code samples used by the documentation site. Analyzed and tested in CI so the docs stay correct.
+publish_to: none
+
+environment:
+  sdk: ^3.8.1
+
+resolution: workspace
+
+dependencies:
+  complete_dependency_injector: ^1.0.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.24.0
