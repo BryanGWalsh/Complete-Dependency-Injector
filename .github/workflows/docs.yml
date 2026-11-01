@@ -36,6 +36,18 @@ jobs:
           dart analyze --fatal-infos
           dart test
 
+      # The demo app is both the live demos (/demo/) and the source of the
+      # Flutter samples shown in the docs.
+      - name: Analyze and test demo app
+        working-directory: docs/demo
+        run: |
+          flutter analyze
+          flutter test
+
+      - name: Build demo app for the web
+        working-directory: docs/demo
+        run: flutter build web --base-href /demo/ --pwa-strategy=none --no-web-resources-cdn --output ../public/demo
+
       - name: Generate core API reference
         working-directory: complete_dependency_injector
         run: dart doc --output ../docs/public/api/core

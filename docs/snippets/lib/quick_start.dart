@@ -5,11 +5,26 @@ import 'package:complete_dependency_injector/complete_dependency_injector.dart';
 
 // #region services
 class Logger {
+  // How to build a Logger.
+  static final Factory = InjectableFactory.withoutDependencies<Logger>(
+    () => Logger(),
+  );
+
+  // How to make a Logger available in an injector.
+  static final DefaultProvider = Provider(Logger);
+
   void log(String message) => print('[log] $message');
 }
 
 class GreetingService {
   GreetingService(this._logger);
+
+  static final Factory = InjectableFactory.withDependencies<GreetingService>(
+    DependencyDataBuilder.list([Logger]),
+    (deps) => GreetingService(deps.get<Logger>()),
+  );
+
+  static final DefaultProvider = Provider(GreetingService);
 
   final Logger _logger;
 
@@ -24,17 +39,14 @@ Future<String> runQuickStart() async {
   // #region injector
   // 1. Say which services this injector makes available.
   final injector = Injector([
-    Provider(Logger),
-    Provider(GreetingService),
+    Logger.DefaultProvider,
+    GreetingService.DefaultProvider,
   ]);
 
-  // 2. Say how to build each one.
+  // 2. Register how to build each one.
   injector.registerFactories([
-    InjectableFactory.withoutDependencies<Logger>(() => Logger()),
-    InjectableFactory.withDependencies<GreetingService>(
-      DependencyDataBuilder.list([Logger]),
-      (deps) => GreetingService(deps.get<Logger>()),
-    ),
+    Logger.Factory,
+    GreetingService.Factory,
   ]);
   // #endregion injector
 

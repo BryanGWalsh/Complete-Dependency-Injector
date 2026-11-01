@@ -1,18 +1,43 @@
 // Samples for docs/guide/core-concepts.md.
 import 'package:complete_dependency_injector/complete_dependency_injector.dart';
 
-class ApiClient {}
+// #region convention
+class ApiClient {
+  static final Factory = InjectableFactory.withoutDependencies<ApiClient>(
+    () => ApiClient(),
+  );
+  static final DefaultProvider = Provider(ApiClient);
+}
+// #endregion convention
 
-class SessionState {}
+// #region instance-scope
+class SessionState {
+  // One SessionState per injector that provides it.
+  static final Factory = InjectableFactory.withoutDependencies<SessionState>(
+    () => SessionState(),
+    scope: InjectableScope.instance,
+  );
+  static final DefaultProvider = Provider(SessionState);
+}
+// #endregion instance-scope
 
+// #region interface
 abstract class Clock {
+  // Ask for a Clock, get a SystemClock.
+  static final DefaultProvider = Provider.factory(Clock, fromDerived: SystemClock);
+
   DateTime now();
 }
 
 class SystemClock implements Clock {
+  static final Factory = InjectableFactory.withoutDependencies<SystemClock>(
+    () => SystemClock(),
+  );
+
   @override
   DateTime now() => DateTime.now();
 }
+// #endregion interface
 
 class ApiConfig {
   ApiConfig(this.baseUrl);
@@ -27,31 +52,27 @@ Future<Map<String, Object>> runCoreConcepts() async {
   // #region providers
   final root = Injector([
     // A type built by its registered factory.
-    Provider(ApiClient),
+    ApiClient.DefaultProvider,
+    // An interface backed by an implementation.
+    Clock.DefaultProvider,
     // A ready-made value. No factory needed.
     Provider.value(ApiConfig, ApiConfig('https://api.example.com')),
     // A value under a string token, for non-class settings.
     Provider.value(apiBaseUrl, 'https://api.example.com'),
-    // Ask for Clock, get the SystemClock built by SystemClock's factory.
-    Provider.factory(Clock, fromDerived: SystemClock),
   ]);
   // #endregion providers
 
   // #region factories
   root.registerFactories([
-    InjectableFactory.withoutDependencies<ApiClient>(() => ApiClient()),
-    InjectableFactory.withoutDependencies<SystemClock>(() => SystemClock()),
-    // One SessionState per injector that provides it.
-    InjectableFactory.withoutDependencies<SessionState>(
-      () => SessionState(),
-      scope: InjectableScope.instance,
-    ),
+    ApiClient.Factory,
+    SystemClock.Factory,
+    SessionState.Factory,
   ]);
   // #endregion factories
 
   // #region hierarchy
-  final screenA = Injector([Provider(SessionState)], parent: root);
-  final screenB = Injector([Provider(SessionState)], parent: root);
+  final screenA = Injector([SessionState.DefaultProvider], parent: root);
+  final screenB = Injector([SessionState.DefaultProvider], parent: root);
 
   // Both children share the root's ApiClient...
   final clientA = await screenA.getService<ApiClient>();

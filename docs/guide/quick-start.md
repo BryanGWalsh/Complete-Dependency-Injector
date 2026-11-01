@@ -4,20 +4,32 @@ This page builds a two-service program in about five minutes. You'll register se
 
 ## 1. Write some services
 
-Plain Dart classes. Nothing needs to extend or implement anything.
+Every service needs two things:
+
+- a **factory**, which says *this is how to build it*, and
+- a **provider**, which says *an injector makes this service available*.
+
+The recommended convention is to keep both on the service itself, as static `Factory` and `DefaultProvider` members. Your services stay plain Dart classes that don't extend or implement anything.
 
 <<< @/snippets/lib/quick_start.dart#services{dart}
 
+`DependencyDataBuilder.list([Logger])` tells the injector that `GreetingService` needs a `Logger`. The injector resolves it before calling the factory, and `deps.get<Logger>()` hands it over.
+
+::: tip Lint note
+`Factory` and `DefaultProvider` are capitalized on purpose so they read like part of the type. The `lints` package flags that with `non_constant_identifier_names`, so turn that rule off in `analysis_options.yaml`:
+
+```yaml
+analyzer:
+  errors:
+    non_constant_identifier_names: ignore
+```
+:::
+
 ## 2. Create an injector
 
-Every service needs two things:
-
-- a **provider**, which says *this injector makes the service available*, and
-- a **factory**, which says *this is how to build it*.
+Registration now reads as a list of services:
 
 <<< @/snippets/lib/quick_start.dart#injector{dart}
-
-`DependencyDataBuilder.list([Logger])` tells the injector that `GreetingService` needs a `Logger`. The injector resolves it before calling your factory, and `deps.get<Logger>()` hands it over.
 
 ## 3. Ask for a service
 
