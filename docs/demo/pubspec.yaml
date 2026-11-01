@@ -1,0 +1,23 @@
+name: cdi_demo
+description: Live Flutter web demos for the Complete Dependency Injector docs site. The docs import their Flutter samples from this app.
+publish_to: none
+
+environment:
+  sdk: ^3.8.1
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  complete_dependency_injector: ^1.0.0
+  complete_dependency_injector_flutter: ^1.0.0
+  rxdart: ^0.28.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

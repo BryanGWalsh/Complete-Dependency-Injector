@@ -32,7 +32,7 @@ Each service exposes its factory as a static `Factory`, so registration is just 
 - `InjectableFactory.withoutDependencies<T>(() => ...)` is for types with no dependencies.
 - `InjectableFactory.withDependencies<T>(dependencyData, (deps) => ...)` declares dependencies with a `DependencyDataBuilder`. The injector resolves them first and passes them in as `deps`.
 
-A factory can return a `Future<T>` when construction is asynchronous. Anything that depends on that type waits for it.
+When a service needs asynchronous setup, give it `InjectableWithReadyMixin`. The injector waits for it to be ready before handing it out or building anything that depends on it. See [Async services](/use-cases/async-services).
 
 ## Tokens
 

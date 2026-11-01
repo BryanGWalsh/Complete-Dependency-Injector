@@ -2,6 +2,13 @@
 
 A lightweight, fast, and elegant dependency injection solution for Dart and Flutter. 
 
+**[Documentation, tutorials and live demos →](https://complete-dependency-injector.bryangwalsh.com)**
+
+- [Quick start](https://complete-dependency-injector.bryangwalsh.com/guide/quick-start)
+- [Use cases](https://complete-dependency-injector.bryangwalsh.com/use-cases/async-services): async services, scoped services
+- [Live Flutter web demos](https://complete-dependency-injector.bryangwalsh.com/demos/)
+- [API reference](https://complete-dependency-injector.bryangwalsh.com/guide/api-reference)
+
 `complete-dependency-injector` consists of two packages:
 - **`complete_dependency_injector`**: The core Dart dependency injection library.
 - **`complete_dependency_injector_flutter`**: Extensions for Flutter, including widgets for hierarchical injection and reactive ViewModels.

@@ -1,0 +1,10 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # The docs recommend `MyService.Factory` and `MyService.DefaultProvider`
+    # static members, which read like types on purpose.
+    non_constant_identifier_names: ignore
+  exclude:
+    - build/**
+    - web/**
