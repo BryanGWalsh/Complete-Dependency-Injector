@@ -1,24 +1,19 @@
-import 'injector_token_creation_source_enum.dart';
 import 'injector_token_interface.dart';
 
 class InjectorToken implements InjectorTokenInterface {
   final String _tokenStringRepresentation;
-  final InjectorTokenCreationSourceEnum _tokenCreationSource;
   static int _uniqueTokenCreationIdentifierCounter = 1;
 
   InjectorToken.fromCounter()
-      : _tokenStringRepresentation = "counter_$_uniqueTokenCreationIdentifierCounter",
-        _tokenCreationSource = InjectorTokenCreationSourceEnum.counter{
+      : _tokenStringRepresentation = "counter_$_uniqueTokenCreationIdentifierCounter"{
     _uniqueTokenCreationIdentifierCounter++;
   }
 
   InjectorToken.fromString(String identifier)
-      : _tokenStringRepresentation = "string_$identifier",
-        _tokenCreationSource = InjectorTokenCreationSourceEnum.string;
+      : _tokenStringRepresentation = "string_$identifier";
 
   InjectorToken.fromType(Type classType)
-      : _tokenStringRepresentation = "type_$classType-${classType.hashCode}",
-        _tokenCreationSource = InjectorTokenCreationSourceEnum.classType;
+      : _tokenStringRepresentation = "type_$classType-${classType.hashCode}";
 
   static InjectorToken fromTokenOrType(Object tokenOrInjectableClass){
     if(tokenOrInjectableClass.runtimeType == InjectorToken) return tokenOrInjectableClass as InjectorToken;

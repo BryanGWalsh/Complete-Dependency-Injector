@@ -4,7 +4,7 @@ class DependencyListBuilderDependencyMapsUtil {
 
   final DependencyData data;
   final bool _safety;
-  DependencyListBuilderDependencyMapsUtil({safety = true}) : data = DependencyData(safety: safety), _safety = safety;
+  DependencyListBuilderDependencyMapsUtil({bool safety = true}) : data = DependencyData(safety: safety), _safety = safety;
 
   void _addToMap(Iterable<Dependency> dependencies, DependencyMapType type) {
     data.safeToSetOrError(type);
