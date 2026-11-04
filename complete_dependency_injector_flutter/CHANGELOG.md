@@ -1,3 +1,7 @@
+## 2.0.1
+
+- README install snippet now shows `^2.0.0`.
+
 ## 2.0.0
 
 - Requires `complete_dependency_injector` 2.0.0, where the injector that provides a service owns its instance. A service provided by an `InjectorScopeWidget` gets one instance per scope, disposed with the scope. You no longer need `scope: InjectableScope.instance` on its factory (that option was removed).

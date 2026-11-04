@@ -1,3 +1,7 @@
+## 2.0.1
+
+- README install snippet now shows `^2.0.0`.
+
 ## 2.0.0
 
 **Breaking:** where a service is provided now decides where its instance lives.
