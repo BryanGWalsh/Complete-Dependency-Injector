@@ -48,4 +48,5 @@ The `Logger` is built first, then the `GreetingService`. Both are cached in the 
 ## Where to go next
 
 - [Core concepts](./core-concepts) explains providers, factories, tokens and scopes in more depth.
+- [Flutter widgets](./flutter-widgets) shows how to put injectors into a Flutter widget tree.
 - The [API reference](./api-reference) lists every class and method.

@@ -24,7 +24,7 @@ The repository is created after the database has opened, so it can use it straig
 
 ## In Flutter: loading states for free
 
-`DependenciesBuilder` reports `loading` until every dependency of the ViewModel is ready, so a slow service turns into a spinner with no extra code. Press **Reload** to open a fresh database.
+`DependenciesBuilder` reports `loading` until every dependency of the ViewModel is ready, so a slow service turns into a spinner with no extra code. Press **Reload** to load the data again.
 
 <DemoFrame route="/async" :height="420" title="Async services demo" />
 
@@ -38,7 +38,7 @@ The ViewModel and screen:
 
 <<< @/demo/lib/demos/async_loading.dart#widget{dart}
 
-`SlowDatabase` uses `InjectableScope.instance`, so each `InjectorScopeWidget` that provides it gets its own connection. Changing the scope's `key` builds a new scope, and so a new database.
+The screen is a `StatelessWidget`. The first load is covered by the ready mixin, which drives `loading`. After that, reloading is just more state in the service's stream: `users` is `null` while loading, and `DependenciesBuilder` rebuilds when it changes. Keep state like this in services and streams, and you rarely need a `StatefulWidget`.
 
 ::: tip Why not return a Future from the factory?
 A factory's creator function must return the service type itself, so `() => Database.open()` (a `Future<Database>`) doesn't type-check. Use `InjectableWithReadyMixin` for async setup.

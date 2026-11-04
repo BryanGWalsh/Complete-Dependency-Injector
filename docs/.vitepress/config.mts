@@ -40,6 +40,10 @@ export default defineConfig({
         ],
       },
       {
+        text: 'Flutter',
+        items: [{ text: 'Flutter widgets', link: '/guide/flutter-widgets' }],
+      },
+      {
         text: 'Use cases',
         items: [
           { text: 'Async services', link: '/use-cases/async-services' },

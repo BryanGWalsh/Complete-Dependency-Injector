@@ -11,8 +11,6 @@ class SlowDatabase with InjectableWithReadyMixin {
     _open();
   }
 
-  // Instance scope: each screen that provides it gets a fresh connection,
-  // so reloading the screen opens the database again.
   static final Factory = InjectableFactory.withoutDependencies<SlowDatabase>(
     () => SlowDatabase(),
     scope: InjectableScope.instance,
@@ -21,13 +19,21 @@ class SlowDatabase with InjectableWithReadyMixin {
 
   static Duration openDelay = const Duration(seconds: 2);
 
-  final _users = BehaviorSubject<List<String>>();
-  Stream<List<String>> get users => _users.stream;
+  // null while (re)loading, so the UI can show progress after the first load.
+  final _users = BehaviorSubject<List<String>?>();
+  Stream<List<String>?> get users => _users.stream;
 
   Future<void> _open() async {
-    await Future<void>.delayed(openDelay); // pretend to connect
-    _users.add(['Ada Lovelace', 'Grace Hopper', 'Margaret Hamilton']);
+    await _load(); // pretend to connect and query
     setInjectableReadyResult(true); // now the injector hands it out
+  }
+
+  Future<void> reload() => _load();
+
+  Future<void> _load() async {
+    _users.add(null);
+    await Future<void>.delayed(openDelay);
+    _users.add(['Ada Lovelace', 'Grace Hopper', 'Margaret Hamilton']);
   }
 
   @override
@@ -41,7 +47,9 @@ class UsersViewModel extends DependencyBuilderViewModelBase {
       : super(dependencyDataList: DependencyDataBuilder.list([SlowDatabase]));
 
   late SlowDatabase _db;
-  List<String> users = [];
+  List<String>? users;
+
+  bool get reloading => users == null;
 
   @override
   void setPropertiesOnDependencyResolution(Dependencies deps) {
@@ -53,62 +61,60 @@ class UsersViewModel extends DependencyBuilderViewModelBase {
 
   @override
   void updateViewModelPropertiesOnStreamEmission(List snapshots) {
-    users = snapshots[0] as List<String>;
+    users = snapshots[0] as List<String>?;
   }
+
+  void reload() => _db.reload();
 }
 // #endregion view-model
 
 // #region widget
-class AsyncLoadingDemo extends StatefulWidget {
+const _opening = Center(
+  child: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [CircularProgressIndicator(), SizedBox(height: 12), Text('Opening database...')],
+  ),
+);
+
+/// No StatefulWidget needed: the loading and reload state live in the
+/// service's stream, and DependenciesBuilder rebuilds when it changes.
+class AsyncLoadingDemo extends StatelessWidget {
   const AsyncLoadingDemo({super.key});
 
   @override
-  State<AsyncLoadingDemo> createState() => _AsyncLoadingDemoState();
-}
-
-class _AsyncLoadingDemoState extends State<AsyncLoadingDemo> {
-  int _generation = 0;
-
-  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: OutlinedButton.icon(
-            // A new key builds a new scope, so a new SlowDatabase opens.
-            onPressed: () => setState(() => _generation++),
-            icon: const Icon(Icons.refresh),
-            label: const Text('Reload'),
-          ),
-        ),
-        Expanded(
-          child: InjectorScopeWidget(
-            key: ValueKey(_generation),
-            providers: [SlowDatabase.DefaultProvider],
-            child: DependenciesBuilder<UsersViewModel>(
-              cleanViewModelInstance: UsersViewModel(),
-              builder: (context, vm) => dependencyBuilderViewModelSimpleStateHandlingBuildUtilityFn(
-                context: context,
-                viewModel: vm,
-                loadingWidget: const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 12),
-                      Text('Opening database...'),
-                    ],
-                  ),
-                ),
-                build: (context, vm) => ListView(
-                  children: [for (final name in vm.users) ListTile(leading: const Icon(Icons.person), title: Text(name))],
+    return InjectorScopeWidget(
+      providers: [SlowDatabase.DefaultProvider],
+      child: DependenciesBuilder<UsersViewModel>(
+        cleanViewModelInstance: UsersViewModel(),
+        builder: (context, vm) => dependencyBuilderViewModelSimpleStateHandlingBuildUtilityFn(
+          context: context,
+          viewModel: vm,
+          // Shown until SlowDatabase is ready.
+          loadingWidget: _opening,
+          build: (context, vm) => Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: OutlinedButton.icon(
+                  onPressed: vm.reloading ? null : vm.reload,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reload'),
                 ),
               ),
-            ),
+              Expanded(
+                child: vm.reloading
+                    ? _opening
+                    : ListView(
+                        children: [
+                          for (final name in vm.users!) ListTile(leading: const Icon(Icons.person), title: Text(name)),
+                        ],
+                      ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -17,7 +17,7 @@ Try it: sort or select rows in one table and the other doesn't change. The `#` n
 
 ## The scoped service
 
-`TableManager` keeps its state in a stream so the UI can react to it. The important line is `scope: InjectableScope.instance`.
+`TableManager` holds the table's state itself, with one `BehaviorSubject` stream per value (rows, sort column, sort direction and selection), so the UI can react to each one. The important line is `scope: InjectableScope.instance`.
 
 <<< @/demo/lib/demos/scoped_tables.dart#manager{dart}
 
@@ -27,7 +27,7 @@ Each `InjectorScopeWidget` creates a child injector that provides `TableManager`
 
 <<< @/demo/lib/demos/scoped_tables.dart#widgets{dart}
 
-The ViewModel looks the same as any other. It doesn't know which scope it's in:
+The ViewModel observes those streams and copies the latest values into its own properties for the UI. It doesn't know which scope it's in:
 
 <<< @/demo/lib/demos/scoped_tables.dart#view-model{dart}
 
