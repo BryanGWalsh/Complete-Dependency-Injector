@@ -81,8 +81,9 @@ class InjectorInjectableResolver {
     //if(!_factories.containsKey(provideTokenRep) && optional) return InjectorInjectableInstanceScopeContainer(_myId, Future.value(null), name: provider.name);
     final factory = _factories[provideTokenRep]!;
     final dependenciesFuture = resolveDependencies(factory.dependencyData);
-    final instanceMap = factory.scope == InjectableScope.root ? rootResolver.injectableInstances : injectableInstances;
-    return instanceMap[provideTokenRep] = InjectorInjectableInstanceScopeContainer(
+    // The injector that provides the token owns the instance: one per
+    // providing injector, disposed with it.
+    return injectableInstances[provideTokenRep] = InjectorInjectableInstanceScopeContainer(
       _myId,
       dependenciesFuture.then((Dependencies dependencies) => factory.createInjectable(dependencies)),
       name: provider.name,

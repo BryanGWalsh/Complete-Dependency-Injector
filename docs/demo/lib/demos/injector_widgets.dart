@@ -29,11 +29,10 @@ class GreetingText extends StatelessWidget {
 // #endregion read-injector
 
 // #region lifecycle
-/// Instance-scoped service that reports when its scope disposes it.
+/// Provided by the session scope, so the scope owns it and disposes it.
 class ScopeSession implements InjectableWithDisposeInterface {
   static final Factory = InjectableFactory.withoutDependencies<ScopeSession>(
     () => ScopeSession(),
-    scope: InjectableScope.instance,
   );
   static final DefaultProvider = Provider(ScopeSession);
 

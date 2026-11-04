@@ -5,23 +5,20 @@ import '../injector_token/injector_token.dart';
 
 /// A factory responsible for creating instances of an injectable type.
 ///
-/// An [InjectableFactory] describes what dependencies it needs, what scope it
-/// belongs to, and how to create the instance.
+/// An [InjectableFactory] describes what dependencies a type needs and how to
+/// create it. Where the instance lives is decided by where the type is
+/// provided: the injector whose [Provider] is used creates and caches it.
 class InjectableFactory {
   /// The metadata describing the dependencies required by this factory.
   final DependencyData dependencyData;
-
-  /// The scope in which the created instance should reside.
-  final InjectableScope scope;
 
   /// The string representation of the type this factory builds.
   final String buildsType;
 
   final Function _creator;
 
-  InjectableFactory._({DependencyData? dependencyData, InjectableScope? scope, required Type buildsType, required Function creator})
+  InjectableFactory._({DependencyData? dependencyData, required Type buildsType, required Function creator})
       : dependencyData = dependencyData ?? DependencyDataBuilder.empty,
-        scope = scope ?? InjectableScope.root,
         buildsType = InjectorToken.fromType(buildsType).tokenRepresentation,
         _creator = creator;
 
@@ -41,16 +38,14 @@ class InjectableFactory {
   ///
   /// * [dependencyData]: The description of the required dependencies.
   /// * [creator]: A function that takes [Dependencies] and returns an instance of [T].
-  /// * [scope]: The optional [InjectableScope] for the created instance.
-  static InjectableFactory withDependencies<T extends Object>(DependencyData dependencyData, InjectableInstanceCreatorWithDependencies<T> creator, {InjectableScope? scope}) =>
-      InjectableFactory._(buildsType: T, creator: creator, scope: scope, dependencyData: dependencyData);
+  static InjectableFactory withDependencies<T extends Object>(DependencyData dependencyData, InjectableInstanceCreatorWithDependencies<T> creator) =>
+      InjectableFactory._(buildsType: T, creator: creator, dependencyData: dependencyData);
 
   /// Creates an [InjectableFactory] for a type that has no dependencies.
   ///
   /// * [creator]: A function that returns an instance of [T].
-  /// * [scope]: The optional [InjectableScope] for the created instance.
-  static InjectableFactory withoutDependencies<T extends Object>(InjectableInstanceCreatorWithoutDependencies<T> creator, {InjectableScope? scope}) =>
-      InjectableFactory._(buildsType: T, creator: (_) => creator(), scope: scope);
+  static InjectableFactory withoutDependencies<T extends Object>(InjectableInstanceCreatorWithoutDependencies<T> creator) =>
+      InjectableFactory._(buildsType: T, creator: (_) => creator());
 }
 
 /// A function type that creates an instance of [T] using resolved [dependencies].

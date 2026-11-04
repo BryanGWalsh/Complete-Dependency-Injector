@@ -1,4 +1,4 @@
-// The basics: a root-scoped service, a ViewModel and DependenciesBuilder.
+// The basics: a service provided at the root, a ViewModel and DependenciesBuilder.
 // Shown on docs/demos/index.md and docs/use-cases pages.
 import 'package:complete_dependency_injector/complete_dependency_injector.dart';
 import 'package:complete_dependency_injector_flutter/complete_dependency_injector_flutter.dart';
@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 // #region service
-/// App-wide counter. Root scope (the default), so every screen shares one.
+/// App-wide counter. Provided at the root, so every screen shares one.
 class CounterService implements InjectableWithDisposeInterface {
   static final Factory = InjectableFactory.withoutDependencies<CounterService>(
     () => CounterService(),

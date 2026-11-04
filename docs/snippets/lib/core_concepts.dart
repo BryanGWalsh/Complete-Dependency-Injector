@@ -10,16 +10,15 @@ class ApiClient {
 }
 // #endregion convention
 
-// #region instance-scope
+// #region per-child
+/// Provided by each child injector, so each child gets its own.
 class SessionState {
-  // One SessionState per injector that provides it.
   static final Factory = InjectableFactory.withoutDependencies<SessionState>(
     () => SessionState(),
-    scope: InjectableScope.instance,
   );
   static final DefaultProvider = Provider(SessionState);
 }
-// #endregion instance-scope
+// #endregion per-child
 
 // #region interface
 abstract class Clock {

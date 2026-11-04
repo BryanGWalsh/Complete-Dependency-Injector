@@ -2,10 +2,10 @@
 
 Some services hold state that belongs to one part of the screen. Picture a dashboard with two product tables. Each table needs its own sort order and selection, but both read from the same data source.
 
-With Complete Dependency Injector, that's two lines of configuration:
+With Complete Dependency Injector, where you provide a service decides how many there are:
 
-- `ProductRepository` uses the default **root** scope, so the whole app shares one.
-- `TableManager` uses **`InjectableScope.instance`**, and each table is wrapped in its own `InjectorScopeWidget`, so each table gets its own.
+- `ProductRepository` is provided at the **root**, so the whole app shares one.
+- `TableManager` is provided by an `InjectorScopeWidget` around each table, so each table gets its own.
 
 Try it: sort or select rows in one table and the other doesn't change. The `#` number in each title is that table's `TableManager` instance.
 
@@ -17,7 +17,7 @@ Try it: sort or select rows in one table and the other doesn't change. The `#` n
 
 ## The scoped service
 
-`TableManager` holds the table's state itself, with one `BehaviorSubject` stream per value (rows, sort column, sort direction and selection), so the UI can react to each one. The important line is `scope: InjectableScope.instance`.
+`TableManager` holds the table's state itself, with one `BehaviorSubject` stream per value (rows, sort column, sort direction and selection), so the UI can react to each one. Nothing in its factory says it's per-table. That comes from where it's provided.
 
 <<< @/demo/lib/demos/scoped_tables.dart#manager{dart}
 

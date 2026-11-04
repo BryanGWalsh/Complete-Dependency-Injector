@@ -44,12 +44,15 @@ Then provide it with `Provider.value(apiBaseUrl, '...')` and read it with `injec
 
 ## Scopes: where instances live
 
-Each factory has an `InjectableScope`:
+An instance lives in **the injector that provides it**. That injector creates it the first time it's asked for, caches it, and disposes it when the injector is disposed.
 
-- `InjectableScope.root` (the default) caches the instance in the root injector, so the whole app shares one.
-- `InjectableScope.instance` caches the instance in the injector that provides it. Two child injectors that both provide the type each get their own.
+- Provide a service at the **root** and the whole app shares one instance.
+- Provide it in a **child** injector and that child gets its own. Two children that both provide the type each get their own instance.
+- A child that provides a type its parent also provides **overrides** it. The child gets its own instance, and the parent keeps its own.
 
-<<< @/snippets/lib/core_concepts.dart#instance-scope{dart}
+Factories don't say where an instance lives. They only describe how to build it, so the same factory works for an app-wide service and a per-screen one.
+
+<<< @/snippets/lib/core_concepts.dart#per-child{dart}
 
 <<< @/snippets/lib/core_concepts.dart#hierarchy{dart}
 

@@ -53,7 +53,7 @@ In the demo above, turn off **Show session scope** to remove a scope and watch i
 
 <<< @/demo/lib/demos/injector_widgets.dart#dispose{dart}
 
-A service is only cached in a scope if its factory uses `InjectableScope.instance`. With the default `InjectableScope.root`, the instance lives in the root injector and is shared app-wide, even when a scope provides it. See [Scopes](./core-concepts#scopes-where-instances-live).
+Where you provide a service decides where it lives. Provide it in an `InjectorScopeWidget` and each scope gets its own instance, disposed with the scope. Provide it at the root and the whole app shares one. See [Scopes](./core-concepts#scopes-where-instances-live).
 
 ::: info InjectorProviderWidget
 `InjectorProviderWidget` is the building block both widgets use internally. You shouldn't need it directly; use `InjectorRootWidget` or `InjectorScopeWidget` instead.

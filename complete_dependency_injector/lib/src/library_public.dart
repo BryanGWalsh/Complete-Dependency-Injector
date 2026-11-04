@@ -3,7 +3,6 @@ export "./dependencies/dependency_data.dart";
 export "./dependencies/dependencies_container.dart";
 export "./dependencies/dependency_data_builder.dart";
 export "./injectable/injectable_interface.dart";
-export "./injectable/injectable_scope.dart";
 export "./injectable/injectable_with_dispose_interface.dart";
 export "./injectable/injectable_with_ready_interface.dart";
 export "./injectable/injectable_with_ready_mixin.dart";
