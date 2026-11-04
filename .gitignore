@@ -74,3 +74,7 @@
 **/example/linux/
 **/example/windows/
 **/example/web/
+
+# Local helper scripts
+test.sh
+publish.sh
