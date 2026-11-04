@@ -29,20 +29,9 @@ class ProductRepository {
 // #endregion repository
 
 // #region manager
-class TableState {
-  const TableState({required this.rows, required this.sortColumn, required this.ascending, this.selected});
-  final List<Product> rows;
-  final int sortColumn;
-  final bool ascending;
-  final String? selected;
-}
-
-/// Sorting and selection for one table.
+/// Sorting and selection for one table. Each piece of state is its own stream.
 class TableManager implements InjectableWithDisposeInterface {
-  TableManager(ProductRepository repository)
-      : _state = BehaviorSubject.seeded(
-          TableState(rows: repository.all(), sortColumn: 0, ascending: true),
-        );
+  TableManager(ProductRepository repository) : _rows = BehaviorSubject.seeded(repository.all());
 
   static final Factory = InjectableFactory.withDependencies<TableManager>(
     DependencyDataBuilder.list([ProductRepository]),
@@ -55,24 +44,32 @@ class TableManager implements InjectableWithDisposeInterface {
   static int _created = 0;
   final int id = ++_created;
 
-  final BehaviorSubject<TableState> _state;
-  Stream<TableState> get state => _state.stream;
+  final BehaviorSubject<List<Product>> _rows;
+  final _sortColumn = BehaviorSubject<int>.seeded(0);
+  final _ascending = BehaviorSubject<bool>.seeded(true);
+  final _selected = BehaviorSubject<String?>.seeded(null);
+
+  Stream<List<Product>> get rows => _rows.stream;
+  Stream<int> get sortColumn => _sortColumn.stream;
+  Stream<bool> get ascending => _ascending.stream;
+  Stream<String?> get selected => _selected.stream;
 
   void sortBy(int column, bool ascending) {
-    final rows = [..._state.value.rows]..sort((a, b) {
+    final sorted = [..._rows.value]..sort((a, b) {
         final result = column == 0 ? a.name.compareTo(b.name) : a.price.compareTo(b.price);
         return ascending ? result : -result;
       });
-    _state.add(TableState(rows: rows, sortColumn: column, ascending: ascending, selected: _state.value.selected));
+    _sortColumn.add(column);
+    _ascending.add(ascending);
+    _rows.add(sorted);
   }
 
-  void select(String name) {
-    final s = _state.value;
-    _state.add(TableState(rows: s.rows, sortColumn: s.sortColumn, ascending: s.ascending, selected: name));
-  }
+  void select(String name) => _selected.add(name);
 
   @override
-  Future<void> dispose() => _state.close();
+  Future<void> dispose() async {
+    await Future.wait([_rows.close(), _sortColumn.close(), _ascending.close(), _selected.close()]);
+  }
 }
 // #endregion manager
 
@@ -82,7 +79,12 @@ class TableViewModel extends DependencyBuilderViewModelBase {
       : super(dependencyDataList: DependencyDataBuilder.list([TableManager]));
 
   late TableManager manager;
-  late TableState table;
+
+  // Local copies of the service's streams, used by the UI.
+  List<Product> rows = [];
+  int sortColumn = 0;
+  bool ascending = true;
+  String? selected;
 
   @override
   void setPropertiesOnDependencyResolution(Dependencies deps) {
@@ -90,11 +92,15 @@ class TableViewModel extends DependencyBuilderViewModelBase {
   }
 
   @override
-  Iterable<Stream> getListOfStreamsToObserve() => [manager.state];
+  Iterable<Stream> getListOfStreamsToObserve() =>
+      [manager.rows, manager.sortColumn, manager.ascending, manager.selected];
 
   @override
   void updateViewModelPropertiesOnStreamEmission(List snapshots) {
-    table = snapshots[0] as TableState;
+    rows = snapshots[0] as List<Product>;
+    sortColumn = snapshots[1] as int;
+    ascending = snapshots[2] as bool;
+    selected = snapshots[3] as String?;
   }
 }
 // #endregion view-model
@@ -145,20 +151,20 @@ class ProductTable extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('$title · TableManager #${vm.manager.id}', style: Theme.of(context).textTheme.titleMedium),
-                  Text('Selected: ${vm.table.selected ?? 'none'}', key: Key('$title-selected')),
+                  Text('Selected: ${vm.selected ?? 'none'}', key: Key('$title-selected')),
                   DataTable(
                     key: Key('$title-table'),
-                    sortColumnIndex: vm.table.sortColumn,
-                    sortAscending: vm.table.ascending,
+                    sortColumnIndex: vm.sortColumn,
+                    sortAscending: vm.ascending,
                     showCheckboxColumn: false,
                     columns: [
                       DataColumn(label: const Text('Product'), onSort: vm.manager.sortBy),
                       DataColumn(label: const Text('Price'), numeric: true, onSort: vm.manager.sortBy),
                     ],
                     rows: [
-                      for (final p in vm.table.rows)
+                      for (final p in vm.rows)
                         DataRow(
-                          selected: p.name == vm.table.selected,
+                          selected: p.name == vm.selected,
                           onSelectChanged: (_) => vm.manager.select(p.name),
                           cells: [DataCell(Text(p.name)), DataCell(Text('\$${p.price.toStringAsFixed(0)}'))],
                         ),
