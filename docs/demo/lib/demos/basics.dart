@@ -1,4 +1,4 @@
-// The basics: a root-scoped service, a ViewModel and DependenciesBuilder.
+// The basics: a service provided at the root, a ViewModel and DependenciesBuilder.
 // Shown on docs/demos/index.md and docs/use-cases pages.
 import 'package:complete_dependency_injector/complete_dependency_injector.dart';
 import 'package:complete_dependency_injector_flutter/complete_dependency_injector_flutter.dart';

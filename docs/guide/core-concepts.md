@@ -52,7 +52,7 @@ An instance lives in **the injector that provides it**. That injector creates it
 
 Factories don't say where an instance lives. They only describe how to build it, so the same factory works for an app-wide service and a per-screen one.
 
-<<< @/snippets/lib/core_concepts.dart#instance-scope{dart}
+<<< @/snippets/lib/core_concepts.dart#per-child{dart}
 
 <<< @/snippets/lib/core_concepts.dart#hierarchy{dart}
 
