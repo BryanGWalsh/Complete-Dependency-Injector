@@ -6,7 +6,7 @@ Every demo is a screen in one small Flutter web app, built from [`docs/demo`](ht
 
 ## The basics
 
-A root-scoped `CounterService` keeps its count in a stream. A ViewModel observes the stream, and `DependenciesBuilder` rebuilds when it changes.
+A `CounterService` provided at the root keeps its count in a stream. A ViewModel observes the stream, and `DependenciesBuilder` rebuilds when it changes.
 
 <DemoFrame route="/basics" :height="360" title="Basics demo" />
 

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 // #region service
-/// App-wide counter. Root scope (the default), so every screen shares one.
+/// App-wide counter. Provided at the root, so every screen shares one.
 class CounterService implements InjectableWithDisposeInterface {
   static final Factory = InjectableFactory.withoutDependencies<CounterService>(
     () => CounterService(),

@@ -35,7 +35,7 @@ Then run `dart pub get` or `flutter pub get`.
 
 - **Hierarchical Injection**: Create nested scopes that inherit providers from their parents.
 - **Scoped Providers**: Define dependencies at any level of the hierarchy, ensuring instances are isolated and managed within their respective scopes.
-- **Asynchronous Service Creation**: First-class support for services that require asynchronous setup. Factories can return `Future` instances, and the injector automatically manages resolution and dependency waiting.
+- **Asynchronous Service Creation**: First-class support for services that need asynchronous setup. Dependents automatically wait until a service reports that it is ready.
 - **Async Initialization**: Use the `Ready` mixin for services that need to perform async work after construction (e.g., connecting to a database).
 - **Flutter Integration**: Provides fine-grained state and update control like the BLoC pattern, but without any of the boilerplate.
 - **ViewModel Pattern**: A robust pattern for bridging your business logic and UI, with built-in state handling for `ready`, `loading`, and `error` states.
@@ -49,17 +49,19 @@ Then run `dart pub get` or `flutter pub get`.
 At the heart of `complete-dependency-injector` are **Providers**, **Factories**, and **Injectors**.
 
 - **Providers** define the mapping of a token (usually a `Type`) to a specific implementation. They tell the injector *what* should be available in a given scope.
-- **Factories** define *how* to create an instance of a type. They are registered globally and shared across all injectors. A factory specifies dependencies, construction logic, and its **InjectableScope**.
+- **Factories** define *how* to create an instance of a type. They are registered globally and shared across all injectors. A factory specifies dependencies and construction logic.
 - **Injectors** are containers that hold providers and manage the lifecycle of instances. They can be nested to create hierarchies.
 
 **Important**: To get a service injected, you must define both a **Provider** (to register the type in a scope) and a **Factory** (to define how to build it). The only exceptions are `Provider.value` and `Provider.existing`, which do not require factories.
 
-### Injectable Scopes
+### Where Instances Live
 
-The `InjectableScope` defined on a factory determines where the created instance is cached:
+An instance lives in the injector that **provides** it:
 
-- `InjectableScope.root`: (Default) The instance is created once and cached in the root injector. It acts as a global singleton.
-- `InjectableScope.instance`: The instance is cached in the specific injector that first requested it. This allows you to have "scoped singletons" by providing the same type in different `InjectorScopeWidget`s.
+- Provide a service in the root injector and the whole app shares one instance.
+- Provide it in a child injector (or an `InjectorScopeWidget`) and that child gets its own instance, which is disposed with it. Two children that both provide the type each get their own.
+
+Factories only describe how to build a type, so the same factory works for an app-wide service and a per-scope one.
 
 ---
 
@@ -76,11 +78,9 @@ Factories only need to be registered once, typically at the start of your applic
 rootInjector.registerFactories([
   InjectableFactory.withoutDependencies<AuthService>(() => AuthService()),
   
-  // A scoped singleton (one instance per injector scope)
   InjectableFactory.withDependencies<UserRepository>(
     DependencyDataBuilder.list([AuthService, ApiClient]),
     (deps) => UserRepository(deps.get<AuthService>(), deps.get<ApiClient>()),
-    scope: InjectableScope.instance, 
   ),
 ]);
 ```
@@ -102,18 +102,11 @@ final rootInjector = Injector([
 You can create a child scope and provide different services or even override parent providers.
 
 ```dart
-// Child scope providing a UserRepository
+// Each child that provides UserRepository gets its own instance.
+// AuthService and ApiClient still come from the root.
 final childInjector = Injector([
   Provider(UserRepository),
 ], parent: rootInjector);
-
-// Register the factory for UserRepository globally (if not already done)
-rootInjector.registerFactory(
-  InjectableFactory.withDependencies<UserRepository>(
-    DependencyDataBuilder.list([AuthService, ApiClient]),
-    (deps) => UserRepository(deps.get<AuthService>(), deps.get<ApiClient>()),
-  ),
-);
 ```
 
 ### 4. Automatic Instance Creation

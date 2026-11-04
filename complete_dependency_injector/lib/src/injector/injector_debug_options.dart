@@ -1,10 +1,12 @@
+/// Controls how strict an [Injector] is about its configuration.
 class InjectorDebugOptions {
+  /// Allow registering a second factory for a type that already has one.
   final bool allowFactoryReplacement;
-  final bool errorOnProviderInstanceScopeMismatch;
+
+  /// Throw when an injector's providers define the same token more than once.
   final bool errorOnDuplicateScopeProviderStrategy;
 
-  InjectorDebugOptions({this.allowFactoryReplacement = false, this.errorOnProviderInstanceScopeMismatch = true, this.errorOnDuplicateScopeProviderStrategy = true});
+  InjectorDebugOptions({this.allowFactoryReplacement = false, this.errorOnDuplicateScopeProviderStrategy = true});
 
-  InjectorDebugOptions.liveDangerously({this.allowFactoryReplacement = true, this.errorOnProviderInstanceScopeMismatch = false, this.errorOnDuplicateScopeProviderStrategy = false});
-
+  InjectorDebugOptions.liveDangerously({this.allowFactoryReplacement = true, this.errorOnDuplicateScopeProviderStrategy = false});
 }

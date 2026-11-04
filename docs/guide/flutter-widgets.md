@@ -53,12 +53,7 @@ In the demo above, turn off **Show session scope** to remove a scope and watch i
 
 <<< @/demo/lib/demos/injector_widgets.dart#dispose{dart}
 
-::: warning Match the factory's scope to where you provide it
-- A service you provide in an `InjectorScopeWidget` should use `scope: InjectableScope.instance` on its factory. Each scope then gets one instance, and disposes it when the scope leaves the tree.
-- A service with the default `InjectableScope.root` should be provided at the root injector, so the whole app shares one instance.
-
-Don't provide a root-scoped service only in a child scope. In the current version the child doesn't find the cached instance, so every request creates a new one. See [Scopes](./core-concepts#scopes-where-instances-live).
-:::
+Where you provide a service decides where it lives. Provide it in an `InjectorScopeWidget` and each scope gets its own instance, disposed with the scope. Provide it at the root and the whole app shares one. See [Scopes](./core-concepts#scopes-where-instances-live).
 
 ::: info InjectorProviderWidget
 `InjectorProviderWidget` is the building block both widgets use internally. You shouldn't need it directly; use `InjectorRootWidget` or `InjectorScopeWidget` instead.

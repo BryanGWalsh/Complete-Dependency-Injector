@@ -10,8 +10,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  complete_dependency_injector: ^1.0.0
-  complete_dependency_injector_flutter: ^1.0.0
+  complete_dependency_injector: ^2.0.0
+  complete_dependency_injector_flutter: ^2.0.0
   rxdart: ^0.28.0
 
 dev_dependencies:

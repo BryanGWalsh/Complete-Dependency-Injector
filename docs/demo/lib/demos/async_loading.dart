@@ -13,7 +13,6 @@ class SlowDatabase with InjectableWithReadyMixin {
 
   static final Factory = InjectableFactory.withoutDependencies<SlowDatabase>(
     () => SlowDatabase(),
-    scope: InjectableScope.instance,
   );
   static final DefaultProvider = Provider(SlowDatabase);
 

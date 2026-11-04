@@ -1,6 +1,6 @@
 name: complete_dependency_injector
 description: A feature-complete hierarchical and async dependency injector for Dart and Flutter.
-version: 1.0.1
+version: 2.0.0
 repository: https://github.com/BryanGWalsh/Complete-Dependency-Injector
 homepage: https://complete-dependency-injector.bryangwalsh.com
 documentation: https://complete-dependency-injector.bryangwalsh.com

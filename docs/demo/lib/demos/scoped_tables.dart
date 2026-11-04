@@ -12,7 +12,7 @@ class Product {
 }
 
 // #region repository
-/// Shared data source. Root scope (the default): one for the whole app.
+/// Shared data source. Provided at the root, so the whole app shares one.
 class ProductRepository {
   static final Factory = InjectableFactory.withoutDependencies<ProductRepository>(
     () => ProductRepository(),
@@ -29,15 +29,14 @@ class ProductRepository {
 // #endregion repository
 
 // #region manager
-/// Sorting and selection for one table. Each piece of state is its own stream.
+/// Sorting and selection for one table. Provided by each table's scope, so
+/// each table gets its own. Each piece of state is its own stream.
 class TableManager implements InjectableWithDisposeInterface {
   TableManager(ProductRepository repository) : _rows = BehaviorSubject.seeded(repository.all());
 
   static final Factory = InjectableFactory.withDependencies<TableManager>(
     DependencyDataBuilder.list([ProductRepository]),
     (deps) => TableManager(deps.get<ProductRepository>()),
-    // One TableManager per injector that provides it.
-    scope: InjectableScope.instance,
   );
   static final DefaultProvider = Provider(TableManager);
 
