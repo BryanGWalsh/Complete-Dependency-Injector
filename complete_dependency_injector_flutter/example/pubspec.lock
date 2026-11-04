@@ -45,18 +45,18 @@ packages:
     dependency: "direct main"
     description:
       name: complete_dependency_injector
-      sha256: "9eed57dac01d7e8a924a0b405b261e89467593328ee2fd2a84002d72ff04806d"
+      sha256: "631d4b5892f2de2b18b1135c17330c8be751b58b9eb932131ab2e8fced432114"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "2.0.0"
   complete_dependency_injector_flutter:
     dependency: "direct main"
     description:
       name: complete_dependency_injector_flutter
-      sha256: "79e4a35aa79d448a8c6b1704c82803d8dd308bf70bb23faab2e501354bedb488"
+      sha256: f73e866a8528cc3af9eee93a8424da0e6e2407e359922e95a92c0968441539e4
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "2.0.0"
   fake_async:
     dependency: transitive
     description:
