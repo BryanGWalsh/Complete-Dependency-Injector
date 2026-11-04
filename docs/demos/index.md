@@ -18,6 +18,12 @@ A root-scoped `CounterService` keeps its count in a stream. A ViewModel observes
 <<< @/demo/lib/demos/basics.dart#widget{dart}
 :::
 
+## Injector widgets
+
+Nested `InjectorScopeWidget`s, a scope overriding its parent, and a scope disposing its service when it leaves the tree. [Read the guide](/guide/flutter-widgets).
+
+<DemoFrame route="/widgets" :height="440" title="Injector widgets demo" />
+
 ## Async services
 
 A service that takes two seconds to open, and a screen that shows a loading state until it's ready. [Read the guide](/use-cases/async-services).

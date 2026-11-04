@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'demos/async_loading.dart';
 import 'demos/basics.dart';
+import 'demos/injector_widgets.dart';
 import 'demos/scoped_tables.dart';
 
 class Demo {
@@ -16,6 +17,7 @@ class Demo {
 
 final demos = [
   Demo('/basics', 'The basics', 'A shared service and a ViewModel that rebuilds when its stream changes.', (_) => const BasicsDemo()),
+  Demo('/widgets', 'Injector widgets', 'Nested scopes, overriding a parent, and disposal when a scope leaves the tree.', (_) => const InjectorWidgetsDemo()),
   Demo('/async', 'Async services', 'A service that takes two seconds to open, with a loading state.', (_) => const AsyncLoadingDemo()),
   Demo('/tables', 'Scoped services', 'Two tables, each with its own TableManager.', (_) => const ScopedTablesDemo()),
 ];
@@ -34,6 +36,7 @@ Injector createRootInjector() {
     injector.registerFactories([
       CounterService.Factory,
       SlowDatabase.Factory,
+      ScopeSession.Factory,
       ProductRepository.Factory,
       TableManager.Factory,
     ]);

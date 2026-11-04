@@ -1,5 +1,6 @@
 import 'package:cdi_demo/demos/async_loading.dart';
 import 'package:cdi_demo/demos/basics.dart';
+import 'package:cdi_demo/demos/injector_widgets.dart';
 import 'package:cdi_demo/demos/scoped_tables.dart';
 import 'package:cdi_demo/main.dart';
 import 'package:complete_dependency_injector_flutter/complete_dependency_injector_flutter.dart';
@@ -29,6 +30,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pumpAndSettle();
     expect(find.text('Grace Hopper'), findsOneWidget);
+
+    // Reload goes through the service, so no StatefulWidget is needed.
+    await tester.tap(find.text('Reload'));
+    await tester.pump();
+    expect(find.text('Opening database...'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpAndSettle();
+    expect(find.text('Grace Hopper'), findsOneWidget);
   });
 
   testWidgets('tables: each table has its own TableManager', (tester) async {
@@ -53,5 +62,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Selected: Monitor'), findsOneWidget);
     expect(find.text('Selected: none'), findsOneWidget);
+  });
+
+  testWidgets('widgets: nested scopes override, removed scopes dispose', (tester) async {
+    await tester.pumpWidget(host(const InjectorWidgetsDemo()));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello from the outer scope'), findsOneWidget);
+    expect(find.text('Hello from the inner scope'), findsOneWidget);
+    expect(find.text('ScopeSession is alive'), findsOneWidget);
+
+    final before = ScopeSession.disposedCount.value;
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    expect(find.text('ScopeSession is alive'), findsNothing);
+    expect(ScopeSession.disposedCount.value, before + 1);
   });
 }
