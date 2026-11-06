@@ -40,17 +40,13 @@ class InjectorInjectableResolver {
   Future<T> getService<T>([Object? token]) async {
     final tokenString = InjectorToken.fromTokenOrType(token ?? T).tokenRepresentation;
     final container = _tryFindOrInstantiateNewInstanceOnCorrectScope(tokenString, false);
-    var completer = Completer<T>();
-    container.serviceFuture.then((value) => completer.complete(value as T));
-    return completer.future;
+    return (await container.serviceFuture) as T;
   }
 
   Future<T?> getServiceOrNull<T>([Object? token]) async {
     final tokenString = InjectorToken.fromTokenOrType(token ?? T).tokenRepresentation;
-    final container = _tryFindOrInstantiateNewInstanceOnCorrectScope(tokenString, false);
-    var completer = Completer<T?>();
-    container.serviceFuture.then((value) => completer.complete(value as T?));
-    return completer.future;
+    final container = _tryFindOrInstantiateNewInstanceOnCorrectScope(tokenString, true);
+    return (await container.serviceFuture) as T?;
   }
 
   InjectorInjectableInstanceScopeContainer _tryFindOrInstantiateNewInstanceOnCorrectScope(String provideTokenRep, bool optional) {
@@ -58,7 +54,11 @@ class InjectorInjectableResolver {
       return parentResolver!._tryFindOrInstantiateNewInstanceOnCorrectScope(provideTokenRep, optional);
     }
 
-    if (!_providers.containsKey(provideTokenRep) && !optional) throw InjectorError("No provider found for $provideTokenRep");
+    if (!_providers.containsKey(provideTokenRep)) {
+      if (!optional) throw InjectorError("No provider found for $provideTokenRep");
+      // An optional dependency that nothing provides resolves to null.
+      return InjectorInjectableInstanceScopeContainer(_myId, Future.value(null));
+    }
     final provider = _providers[provideTokenRep]!;
     if (injectableInstances.containsKey(provideTokenRep)) return injectableInstances[provideTokenRep]!;
     if (provider.useExisting != null) {

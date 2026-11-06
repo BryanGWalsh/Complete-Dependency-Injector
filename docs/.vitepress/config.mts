@@ -48,6 +48,9 @@ export default defineConfig({
         items: [
           { text: 'Async services', link: '/use-cases/async-services' },
           { text: 'Scoped services', link: '/use-cases/scoped-services' },
+          { text: 'Interfaces and implementations', link: '/use-cases/interfaces' },
+          { text: 'Testing with fakes', link: '/use-cases/testing' },
+          { text: 'Configuration and environments', link: '/use-cases/configuration' },
         ],
       },
       {

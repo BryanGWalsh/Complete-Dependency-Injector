@@ -40,6 +40,8 @@ When a type alone isn't enough, for example a `String` setting, use an `Injector
 
 <<< @/snippets/lib/core_concepts.dart#tokens{dart}
 
+See [Configuration and environments](/use-cases/configuration) for using tokens to supply settings per environment.
+
 Then provide it with `Provider.value(apiBaseUrl, '...')` and read it with `injector.getService<String>(apiBaseUrl)`.
 
 ## Scopes: where instances live
@@ -74,6 +76,8 @@ final child = Injector([SessionState.DefaultProvider], parent: injector);
 This keeps everything about a service in one file. For an interface, put the `DefaultProvider` on the interface and the `Factory` on the implementation:
 
 <<< @/snippets/lib/core_concepts.dart#interface{dart}
+
+[Interfaces and implementations](/use-cases/interfaces) covers swapping implementations and aliases in more depth, and [Testing with fakes](/use-cases/testing) shows how to replace a service in tests.
 
 The member is called `DefaultProvider` rather than `Provider` because a static named `Provider` would hide the `Provider` class inside the service. "Default" also signals that a different provider, such as a `Provider.value` fake in a test, can replace it.
 
