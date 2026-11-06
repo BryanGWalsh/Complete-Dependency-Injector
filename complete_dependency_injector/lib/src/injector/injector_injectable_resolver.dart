@@ -17,8 +17,17 @@ class InjectorInjectableResolver {
   final List<InjectorInjectableResolver> childResolvers = [];
   final InjectorDebugOptions debugOptions;
 
+  /// Instances this resolver created, in the order they finished creating.
+  /// A service always finishes after the services it depends on, so disposing
+  /// in reverse disposes dependents before their dependencies.
+  final List<Object?> _createdInOrder = [];
+  Future<void>? _disposeFuture;
+  bool get isDisposed => _disposeFuture != null;
+
   InjectorInjectableResolver(List<Provider> providers, this.debugOptions, {this.parentResolver}) : _myId = _idCounter {
-    rootResolver = parentResolver ?? this;
+    if (parentResolver?.isDisposed ?? false) throw InjectorError("Cannot create a child of a disposed Injector");
+    parentResolver?.childResolvers.add(this);
+    rootResolver = parentResolver?.rootResolver ?? this;
     _idCounter++;
     _providers.addAllFromProviderListSafe(
       providers,
@@ -29,6 +38,7 @@ class InjectorInjectableResolver {
   }
 
   Future<Dependencies> resolveDependencies(DependencyData data) async {
+    _throwIfDisposed();
     await Future.wait(data.all.values.map((e) async {
       final instanceContainer = _tryFindOrInstantiateNewInstanceOnCorrectScope(e.tokenString, e.optional);
       e.providedName = instanceContainer.name;
@@ -49,7 +59,12 @@ class InjectorInjectableResolver {
     return (await container.serviceFuture) as T?;
   }
 
+  void _throwIfDisposed() {
+    if (isDisposed) throw InjectorError("This Injector has been disposed");
+  }
+
   InjectorInjectableInstanceScopeContainer _tryFindOrInstantiateNewInstanceOnCorrectScope(String provideTokenRep, bool optional) {
+    _throwIfDisposed();
     if (parentResolver != null && !_providers.containsKey(provideTokenRep)) {
       return parentResolver!._tryFindOrInstantiateNewInstanceOnCorrectScope(provideTokenRep, optional);
     }
@@ -85,24 +100,61 @@ class InjectorInjectableResolver {
     // providing injector, disposed with it.
     return injectableInstances[provideTokenRep] = InjectorInjectableInstanceScopeContainer(
       _myId,
-      dependenciesFuture.then((Dependencies dependencies) => factory.createInjectable(dependencies)),
+      dependenciesFuture.then((Dependencies dependencies) => factory.createInjectable(dependencies)).then((instance) {
+        _createdInOrder.add(instance);
+        return instance;
+      }),
       name: provider.name,
     );
   }
 
-  Future<void> dispose() async {
-    await Future.wait(childResolvers.map((e) => e.dispose()));
-    final disposalFutures = <Future<void>>[];
-    for (final container in injectableInstances.values) {
-      if (container.parentInjectorId == _myId) {
-        disposalFutures.add(container.serviceFuture.then((instance) async {
-          if (instance is InjectableWithDisposeInterface && instance is! Injector && instance is! InjectorInjectableResolver) {
-            await instance.dispose();
-          }
-        }));
+  /// Disposes child resolvers first, then every instance this resolver owns,
+  /// each exactly once, dependents before their dependencies. Calling it again
+  /// returns the same future.
+  Future<void> dispose() => _disposeFuture ??= _dispose();
+
+  Future<void> _dispose() async {
+    final errors = <Object>[];
+    final stackTraces = <StackTrace>[];
+    void record(Object error, StackTrace stackTrace) {
+      errors.add(error);
+      stackTraces.add(stackTrace);
+    }
+
+    for (final child in List.of(childResolvers)) {
+      try {
+        await child.dispose();
+      } catch (e, s) {
+        record(e, s);
       }
     }
-    await Future.wait(disposalFutures);
+
+    // Aliases share their target's future, so collect each owned future once.
+    final owned = <Future<Object?>>{
+      for (final container in injectableInstances.values)
+        if (container.parentInjectorId == _myId) container.serviceFuture,
+    };
+    // Let in-flight creations finish. A failed creation was already reported to
+    // whoever requested it, so it is not rethrown here.
+    final settled = await Future.wait(owned.map((f) => f.then<Object?>((v) => v, onError: (_) => null)));
+
+    final created = _createdInOrder.reversed.toList();
+    final values = settled.where((instance) => !_createdInOrder.contains(instance));
+    final toDispose = <Object?>{...created, ...values};
+    for (final instance in toDispose) {
+      if (instance is InjectableWithDisposeInterface && instance is! Injector && instance is! InjectorInjectableResolver) {
+        try {
+          await instance.dispose();
+        } catch (e, s) {
+          record(e, s);
+        }
+      }
+    }
+
+    injectableInstances.clear();
+    _createdInOrder.clear();
+    parentResolver?.childResolvers.remove(this);
+    if (errors.isNotEmpty) Error.throwWithStackTrace(errors.first, stackTraces.first);
   }
 
   void registerFactory(InjectableFactory factory) {

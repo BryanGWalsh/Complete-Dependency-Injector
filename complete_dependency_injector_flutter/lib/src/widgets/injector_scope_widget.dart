@@ -8,7 +8,7 @@ import 'injector_provider_widget.dart';
 /// This widget creates a child [Injector] that inherits providers from the
 /// nearest [Injector] above it in the widget tree (if any). It then provides
 /// this new injector to its descendants.
-class InjectorScopeWidget extends StatelessWidget {
+class InjectorScopeWidget extends StatefulWidget {
   final List<Provider> _providers;
   final Widget _child;
 
@@ -23,10 +23,18 @@ class InjectorScopeWidget extends StatelessWidget {
         _child = child;
 
   @override
+  State<InjectorScopeWidget> createState() => _InjectorScopeWidgetState();
+}
+
+class _InjectorScopeWidgetState extends State<InjectorScopeWidget> {
+  // Created once, on the first build. A parent keeps track of its child
+  // injectors, so creating one per build would leave the extras attached to
+  // the parent until it is disposed.
+  Injector? _injector;
+
+  @override
   Widget build(BuildContext context) {
-    final parentContainer = InjectorContainerWidget.of(context);
-    final parentInjector = parentContainer?.injector;
-    final newInjector = Injector(_providers, parent: parentInjector);
-    return InjectorProviderWidget(injector: newInjector, child: _child);
+    final injector = _injector ??= Injector(widget._providers, parent: InjectorContainerWidget.of(context)?.injector);
+    return InjectorProviderWidget(injector: injector, child: widget._child);
   }
 }
