@@ -15,4 +15,8 @@ class Dependency{
   Dependency.namedOptional(Object tokenOrType, String name): this._(InjectorToken.fromTokenOrType(tokenOrType).tokenRepresentation, optional: true, name: name);
   Dependency.positional(Object tokenOrType) : this._(InjectorToken.fromTokenOrType(tokenOrType).tokenRepresentation, optional: false, positionalOnly: true);
   Dependency.positionalOptional(Object tokenOrType) : this._(InjectorToken.fromTokenOrType(tokenOrType).tokenRepresentation, optional: true, positionalOnly: true);
+
+  /// A copy of this request with no resolved instance, so one resolution
+  /// never sees or overwrites another's results.
+  Dependency copyUnresolved() => Dependency._(tokenString, optional: optional, name: wrapperName, positionalOnly: positionalOnly)..index = index;
 }

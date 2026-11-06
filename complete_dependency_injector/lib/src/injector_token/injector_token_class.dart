@@ -16,7 +16,7 @@ class InjectorToken implements InjectorTokenInterface {
       : _tokenStringRepresentation = "type_$classType-${classType.hashCode}";
 
   static InjectorToken fromTokenOrType(Object tokenOrInjectableClass){
-    if(tokenOrInjectableClass.runtimeType == InjectorToken) return tokenOrInjectableClass as InjectorToken;
+    if (tokenOrInjectableClass is InjectorToken) return tokenOrInjectableClass;
     return InjectorToken.fromType(tokenOrInjectableClass as Type);
   }
   @override

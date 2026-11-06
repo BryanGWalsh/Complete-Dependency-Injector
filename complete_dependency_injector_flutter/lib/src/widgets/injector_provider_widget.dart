@@ -18,9 +18,18 @@ class InjectorProviderWidget extends StatefulWidget {
 }
 
 class _InjectorProviderWidgetState extends State<InjectorProviderWidget> {
-  // The injector from the first build is kept for this widget's lifetime, so
-  // its cached instances survive rebuilds.
-  late final Injector _injector = widget._injector;
+  // Kept across rebuilds, so its cached instances survive. When a different
+  // injector is passed in, the old one is disposed and replaced.
+  late Injector _injector = widget._injector;
+
+  @override
+  void didUpdateWidget(InjectorProviderWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(widget._injector, _injector)) {
+      _injector.dispose();
+      _injector = widget._injector;
+    }
+  }
 
   @override
   void dispose() {

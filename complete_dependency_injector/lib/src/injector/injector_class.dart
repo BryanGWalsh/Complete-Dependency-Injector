@@ -23,7 +23,7 @@ class Injector implements InjectableWithDisposeInterface {
   Injector(List<Provider> providers, {InjectorDebugOptions? debugOptions, Injector? parent})
       : _debugOptions = debugOptions ?? parent?._debugOptions ?? InjectorDebugOptions(),
         super() {
-    _resolver = InjectorInjectableResolver(providers, _debugOptions, parentResolver: parent?._resolver);
+    _resolver = InjectorInjectableResolver(this, providers, _debugOptions, parentResolver: parent?._resolver);
   }
 
   /// Registers a list of [InjectableFactory]s with the injector.

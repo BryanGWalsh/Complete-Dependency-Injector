@@ -15,5 +15,5 @@ class InjectorContainerWidget extends InheritedWidget {
   static InjectorContainerWidget? of(BuildContext context) => context.getInheritedWidgetOfExactType<InjectorContainerWidget>();
 
   @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
+  bool updateShouldNotify(covariant InjectorContainerWidget oldWidget) => !identical(injector, oldWidget.injector);
 }

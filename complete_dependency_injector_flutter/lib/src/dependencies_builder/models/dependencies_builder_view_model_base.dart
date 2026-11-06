@@ -1,9 +1,13 @@
+import "package:flutter/foundation.dart";
 import "package:complete_dependency_injector/complete_dependency_injector.dart";
 import "../../lib_internal_main.dart";
 
 abstract class DependencyBuilderViewModelBase {
   // internal properties
   bool _propertiesFormDependencyDataInjectedDependenciesSet = false;
+  // Set when setPropertiesOnDependencyResolution threw. The dependencies don't
+  // change, so retrying would fail the same way: stay in the error state.
+  bool _setPropertiesFailed = false;
 
   // readonly properties 
   bool _error = false;
@@ -26,7 +30,14 @@ abstract class DependencyBuilderViewModelBase {
   })  : _dependencyDataList = dependencyDataList;
 
   void updateFromAsyncDependenciesDataChange(bool hasError, [Dependencies? dependencies, List<dynamic>? streamSnapshots]) {
+    if (_setPropertiesFailed) {
+      _error = true;
+      _state = DependenciesBuilderViewModelStates.generalError;
+      return;
+    }
     _state = DependenciesBuilderViewModelStates.resolvingDependencies;
+    // Cleared on every update, so the flag recovers once a stream emits again.
+    _error = hasError;
     if (hasError) {
       _error = true;
       _state = DependenciesBuilderViewModelStates.generalError;
@@ -37,8 +48,23 @@ abstract class DependencyBuilderViewModelBase {
       return;
     }
     if(_propertiesFormDependencyDataInjectedDependenciesSet == false){
+      try {
+        setPropertiesOnDependencyResolution(dependencies);
+      } catch (error, stackTrace) {
+        // Stay in the error state rather than reporting ready with properties
+        // that were never set.
+        _setPropertiesFailed = true;
+        _error = true;
+        _state = DependenciesBuilderViewModelStates.generalError;
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'complete_dependency_injector_flutter',
+          context: ErrorDescription('while running setPropertiesOnDependencyResolution on $runtimeType'),
+        ));
+        return;
+      }
       _propertiesFormDependencyDataInjectedDependenciesSet = true;
-      setPropertiesOnDependencyResolution(dependencies);
       _state = DependenciesBuilderViewModelStates.waitingForInitialStreamSnapshots;
     }
     if (streamSnapshots == null) return;
