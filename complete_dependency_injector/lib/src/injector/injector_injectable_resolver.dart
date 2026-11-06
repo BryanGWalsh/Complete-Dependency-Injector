@@ -28,7 +28,10 @@ class InjectorInjectableResolver {
     injectableInstances[InjectorToken.fromType(Injector).tokenRepresentation] = InjectorInjectableInstanceScopeContainer(_myId, Future.value(this));
   }
 
-  Future<Dependencies> resolveDependencies(DependencyData data) async {
+  Future<Dependencies> resolveDependencies(DependencyData requested) async {
+    // Resolve into a private copy: the same DependencyData (a factory's, or
+    // one a widget keeps) may be resolved by several injectors at once.
+    final data = requested.copyUnresolved();
     await Future.wait(data.all.values.map((e) async {
       final instanceContainer = _tryFindOrInstantiateNewInstanceOnCorrectScope(e.tokenString, e.optional);
       e.providedName = instanceContainer.name;
@@ -49,6 +52,11 @@ class InjectorInjectableResolver {
     return (await container.serviceFuture) as T?;
   }
 
+  /// Tokens whose instances are being set up right now, across all injectors,
+  /// as `injectorId:token`. Looking up uncached dependencies is synchronous
+  /// all the way down, so a token seen twice on this path is a cycle.
+  static final List<String> _resolutionPath = [];
+
   InjectorInjectableInstanceScopeContainer _tryFindOrInstantiateNewInstanceOnCorrectScope(String provideTokenRep, bool optional) {
     if (parentResolver != null && !_providers.containsKey(provideTokenRep)) {
       return parentResolver!._tryFindOrInstantiateNewInstanceOnCorrectScope(provideTokenRep, optional);
@@ -59,35 +67,48 @@ class InjectorInjectableResolver {
       // An optional dependency that nothing provides resolves to null.
       return InjectorInjectableInstanceScopeContainer(_myId, Future.value(null));
     }
-    final provider = _providers[provideTokenRep]!;
     if (injectableInstances.containsKey(provideTokenRep)) return injectableInstances[provideTokenRep]!;
+
+    final pathEntry = "$_myId:$provideTokenRep";
+    if (_resolutionPath.contains(pathEntry)) {
+      final cycle = [..._resolutionPath.skip(_resolutionPath.indexOf(pathEntry)), pathEntry].map((e) => e.substring(e.indexOf(':') + 1));
+      throw InjectorError("InjectorResolver: Circular dependency: ${cycle.join(' -> ')}");
+    }
+    _resolutionPath.add(pathEntry);
+    try {
+      return _instantiateOnThisScope(provideTokenRep, optional);
+    } finally {
+      _resolutionPath.removeLast();
+    }
+  }
+
+  InjectorInjectableInstanceScopeContainer _instantiateOnThisScope(String provideTokenRep, bool optional) {
+    final provider = _providers[provideTokenRep]!;
     if (provider.useExisting != null) {
-      injectableInstances[provideTokenRep] = _tryFindOrInstantiateNewInstanceOnCorrectScope(
-        provider.useExisting!,
-        optional,
-      ).forReference(name: provider.name);
-      if (injectableInstances.containsKey(provideTokenRep)) return injectableInstances[provideTokenRep]!;
-      //if (optional) return InjectorInjectableInstanceScopeContainer(_myId, Future.value(null), name: provider.name);
-      throw InjectorError("InjectorResolver: Could not instantiate non-optional injectable $provideTokenRep");
+      // Not cached here: the target caches its own instance, so a retry after
+      // a failure, and disposal, both go through the target alone.
+      return _tryFindOrInstantiateNewInstanceOnCorrectScope(provider.useExisting!, optional).forReference(name: provider.name);
     }
 
     if (!provider.shouldHaveFactory && provider.useValue != null) {
       return injectableInstances[provideTokenRep] = InjectorInjectableInstanceScopeContainer(_myId, Future.value(provider.useValue!), name: provider.name);
     }
 
-    if (provider.shouldHaveFactory && !_factories.containsKey(provideTokenRep) /* && !optional */) {
+    if (provider.shouldHaveFactory && !_factories.containsKey(provideTokenRep)) {
       throw InjectorError("InjectorResolver: Could not instantiate non-optional injectable $provideTokenRep");
     }
-    //if(!_factories.containsKey(provideTokenRep) && optional) return InjectorInjectableInstanceScopeContainer(_myId, Future.value(null), name: provider.name);
     final factory = _factories[provideTokenRep]!;
     final dependenciesFuture = resolveDependencies(factory.dependencyData);
+    late final InjectorInjectableInstanceScopeContainer container;
+    final serviceFuture = dependenciesFuture.then((Dependencies dependencies) => factory.createInjectable(dependencies)).catchError((Object error, StackTrace stackTrace) {
+      // Don't cache a failure: the next request tries again.
+      if (identical(injectableInstances[provideTokenRep], container)) injectableInstances.remove(provideTokenRep);
+      Error.throwWithStackTrace(error, stackTrace);
+    });
     // The injector that provides the token owns the instance: one per
     // providing injector, disposed with it.
-    return injectableInstances[provideTokenRep] = InjectorInjectableInstanceScopeContainer(
-      _myId,
-      dependenciesFuture.then((Dependencies dependencies) => factory.createInjectable(dependencies)),
-      name: provider.name,
-    );
+    container = InjectorInjectableInstanceScopeContainer(_myId, serviceFuture, name: provider.name);
+    return injectableInstances[provideTokenRep] = container;
   }
 
   Future<void> dispose() async {
@@ -95,7 +116,10 @@ class InjectorInjectableResolver {
     final disposalFutures = <Future<void>>[];
     for (final container in injectableInstances.values) {
       if (container.parentInjectorId == _myId) {
-        disposalFutures.add(container.serviceFuture.then((instance) async {
+        // A service whose creation failed has nothing to dispose; its error
+        // already went to whoever asked for it.
+        final instanceFuture = container.serviceFuture.then<Object?>((instance) => instance, onError: (_) => null);
+        disposalFutures.add(instanceFuture.then((instance) async {
           if (instance is InjectableWithDisposeInterface && instance is! Injector && instance is! InjectorInjectableResolver) {
             await instance.dispose();
           }

@@ -1,3 +1,13 @@
+## 2.0.3
+
+- Fixed: two injectors building the same factory at the same time could hand each other's dependencies to the new instance, and a `Dependencies` object a service kept could be overwritten by a later resolution. Each resolution now works on its own copy.
+- Fixed: a factory that failed once kept failing, because the failed future was cached. The next request now builds the service again.
+- Fixed: `dispose()` threw the error of any factory that had failed earlier, instead of disposing the services that were created.
+- Fixed: a service reached through an alias (`aliasTokens`, `Provider.existing`) in the same injector was disposed twice.
+- Fixed: `setInjectableReadyResult(false)` was ignored and the service was handed out anyway. It now fails resolution with an `InjectorError`.
+- Fixed: a dependency cycle overflowed the stack and crashed the isolate. It now fails with an `InjectorError` that names the cycle.
+- Added: `InjectableWithReadyMixin.setInjectableReadyError(error, [stackTrace])`, so async setup that fails can fail resolution instead of leaving it waiting forever.
+
 ## 2.0.2
 
 - Fixed: an optional dependency (any entry in `DependencyDataBuilder.list`, or `namedOptional`) that nothing provides now resolves to `null` instead of crashing.

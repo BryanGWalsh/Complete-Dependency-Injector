@@ -2,6 +2,7 @@
 import '../dependencies/dependencies.dart';
 import '../injectable/injectable.dart';
 import '../injector_token/injector_token.dart';
+import '../injector/injector_errors.dart';
 
 /// A factory responsible for creating instances of an injectable type.
 ///
@@ -29,7 +30,12 @@ class InjectableFactory {
   /// Returns a [Future] that completes with the created instance.
   Future<Object> createInjectable(Dependencies dependencies) {
     final instanceOrFuture  = _creator(dependencies);
-    if(instanceOrFuture is InjectableWithReadyInterface) return instanceOrFuture.injectableReady.then((value) => instanceOrFuture);
+    if (instanceOrFuture is InjectableWithReadyInterface) {
+      return instanceOrFuture.injectableReady.then((isReady) {
+        if (!isReady) throw InjectorError("$buildsType reported that it is not ready (setInjectableReadyResult(false))");
+        return instanceOrFuture;
+      });
+    }
     if(instanceOrFuture is Future<Object>) return instanceOrFuture;
     return Future.value(instanceOrFuture);
   } 
