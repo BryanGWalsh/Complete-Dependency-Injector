@@ -1,4 +1,4 @@
-## 2.0.2
+## 2.0.3
 
 - Requires `complete_dependency_injector` 2.0.3.
 - Fixed: when a parent of `DependenciesBuilder` rebuilt, it listened to the ViewModel's streams again. A ready ViewModel dropped back to `loading` until the next emission, and a single-subscription stream threw `Bad state: Stream has already been listened to`.
