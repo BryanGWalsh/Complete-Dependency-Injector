@@ -1,3 +1,9 @@
+## 2.0.2
+
+- Fixed: an optional dependency (any entry in `DependencyDataBuilder.list`, or `namedOptional`) that nothing provides now resolves to `null` instead of crashing.
+- Fixed: `getServiceOrNull` now returns `null` when nothing provides the type, instead of throwing.
+- Fixed: an error thrown while building a dependency deeper in the graph now fails the `getService` future, instead of leaving it waiting forever.
+
 ## 2.0.1
 
 - README install snippet now shows `^2.0.0`.

@@ -1,6 +1,7 @@
 import 'package:cdi_demo/demos/async_loading.dart';
 import 'package:cdi_demo/demos/basics.dart';
 import 'package:cdi_demo/demos/injector_widgets.dart';
+import 'package:cdi_demo/demos/interfaces.dart';
 import 'package:cdi_demo/demos/scoped_tables.dart';
 import 'package:cdi_demo/main.dart';
 import 'package:complete_dependency_injector_flutter/complete_dependency_injector_flutter.dart';
@@ -76,5 +77,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ScopeSession is alive'), findsNothing);
     expect(ScopeSession.disposedCount.value, before + 1);
+  });
+
+  testWidgets('interfaces: a scope swaps the implementation', (tester) async {
+    tester.view.physicalSize = const Size(1400, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(host(const InterfacesDemo()));
+    await tester.pumpAndSettle();
+    expect(find.text('PriceFormatter is UsdFormatter'), findsOneWidget);
+    expect(find.text('PriceFormatter is EurFormatter'), findsOneWidget);
+    expect(find.text('\$199.00'), findsOneWidget);
+    expect(find.text('183,08 €'), findsOneWidget);
   });
 }

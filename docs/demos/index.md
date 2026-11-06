@@ -35,3 +35,9 @@ A service that takes two seconds to open, and a screen that shows a loading stat
 Two tables, each with its own `TableManager`, sharing one `ProductRepository`. [Read the guide](/use-cases/scoped-services).
 
 <DemoFrame route="/tables" :height="420" title="Scoped services demo" />
+
+## Interfaces
+
+Two price lists from the same widget, which asks for an abstract `PriceFormatter`. The root provides `UsdFormatter`, and a scope swaps in `EurFormatter`. [Read the guide](/use-cases/interfaces).
+
+<DemoFrame route="/interfaces" :height="300" title="Interfaces demo" />

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'demos/async_loading.dart';
 import 'demos/basics.dart';
 import 'demos/injector_widgets.dart';
+import 'demos/interfaces.dart';
 import 'demos/scoped_tables.dart';
 
 class Demo {
@@ -20,6 +21,7 @@ final demos = [
   Demo('/widgets', 'Injector widgets', 'Nested scopes, overriding a parent, and disposal when a scope leaves the tree.', (_) => const InjectorWidgetsDemo()),
   Demo('/async', 'Async services', 'A service that takes two seconds to open, with a loading state.', (_) => const AsyncLoadingDemo()),
   Demo('/tables', 'Scoped services', 'Two tables, each with its own TableManager.', (_) => const ScopedTablesDemo()),
+  Demo('/interfaces', 'Interfaces', 'Widgets depend on an abstract PriceFormatter; a scope swaps the implementation.', (_) => const InterfacesDemo()),
 ];
 
 // #region root
@@ -30,6 +32,7 @@ Injector createRootInjector() {
     // App-wide services. Scoped services are provided further down the tree.
     CounterService.DefaultProvider,
     ProductRepository.DefaultProvider,
+    PriceFormatter.DefaultProvider,
   ]);
   // Factories are global, so register them once per app.
   if (!_factoriesRegistered) {
@@ -39,6 +42,8 @@ Injector createRootInjector() {
       ScopeSession.Factory,
       ProductRepository.Factory,
       TableManager.Factory,
+      UsdFormatter.Factory,
+      EurFormatter.Factory,
     ]);
     _factoriesRegistered = true;
   }

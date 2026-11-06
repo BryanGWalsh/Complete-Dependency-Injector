@@ -1,6 +1,6 @@
 class InjectorInjectableInstanceScopeContainer {
   final int parentInjectorId;
-  final Future<Object> serviceFuture;
+  final Future<Object?> serviceFuture;
   final String? name;
 
   InjectorInjectableInstanceScopeContainer(
