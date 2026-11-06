@@ -11,6 +11,8 @@ class Dependency{
   bool get maybeNamed => !positionalOnly && parameterName != null;
   String? get parameterName => wrapperName ?? providedName;
   Dependency._(this.tokenString, {this.optional = false, String? name, bool? positionalOnly}) : wrapperName = name, positionalOnly = positionalOnly ?? false;
+  /// A copy of this request with nothing resolved yet.
+  Dependency copyUnresolved() => Dependency._(tokenString, optional: optional, name: wrapperName, positionalOnly: positionalOnly)..index = index;
   Dependency.named(Object tokenOrType, String name) : this._(InjectorToken.fromTokenOrType(tokenOrType).tokenRepresentation, optional: false, name: name);
   Dependency.namedOptional(Object tokenOrType, String name): this._(InjectorToken.fromTokenOrType(tokenOrType).tokenRepresentation, optional: true, name: name);
   Dependency.positional(Object tokenOrType) : this._(InjectorToken.fromTokenOrType(tokenOrType).tokenRepresentation, optional: false, positionalOnly: true);

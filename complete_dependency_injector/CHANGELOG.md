@@ -3,6 +3,11 @@
 - Fixed: an optional dependency (any entry in `DependencyDataBuilder.list`, or `namedOptional`) that nothing provides now resolves to `null` instead of crashing.
 - Fixed: `getServiceOrNull` now returns `null` when nothing provides the type, instead of throwing.
 - Fixed: an error thrown while building a dependency deeper in the graph now fails the `getService` future, instead of leaving it waiting forever.
+- Fixed: a dependency cycle (`A` needs `B` needs `A`, or aliases pointing at each other) overflowed the stack and could crash the isolate. It now fails with an `InjectorError` that names the cycle.
+- Fixed: two injectors resolving the same factory or `DependencyData` at the same time shared one set of results, so one scope could be built with another scope's dependencies. Each resolution now fills its own copy.
+- Fixed: `getService<Injector>()`, and factories that list `Injector` as a dependency, threw "No provider found". They now get the closest injector.
+- Fixed: subclasses of `InjectorToken` threw a cast error in `getService` and `DependencyDataBuilder`.
+- Fixed: after an optional lookup of an alias whose target nothing provides, later required lookups of that alias returned `null` instead of throwing.
 
 ## 2.0.1
 
