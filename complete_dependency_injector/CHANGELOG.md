@@ -1,12 +1,10 @@
-## 2.1.0
+## 2.0.3
 
 Bug fixes from a full review of the library. Each fix has a regression test.
 
 **Resolution**
+- Fixed: an optional dependency, or `getServiceOrNull`, for a type that is provided but has no registered factory now resolves to `null` instead of throwing.
 - Fixed: two injectors building the same factory at the same time could hand each other's dependencies to the new instance. Each resolution now fills its own copy of the `DependencyData`.
-- Fixed: an optional dependency (any `DependencyDataBuilder.list` entry, or `namedOptional`) that nothing provides, or that has no registered factory, now resolves to `null` instead of crashing.
-- Fixed: `getServiceOrNull` now returns `null` when nothing provides the type or no factory is registered, instead of throwing.
-- Fixed: an error thrown while building a dependency deeper in the graph now fails the `getService` future, instead of leaving it waiting forever.
 - Fixed: a factory that failed once kept failing, because the failed future was cached. The next request now builds the service again.
 - Fixed: a dependency cycle, or aliases pointing at each other, overflowed the stack. It now fails with an `InjectorError` that names the cycle.
 - Fixed: after an optional lookup of an alias whose target nothing provides, later required lookups returned `null` instead of throwing.
@@ -31,6 +29,12 @@ Bug fixes from a full review of the library. Each fix has a regression test.
 **Errors**
 - Fixed: `InjectorError.toString()` printed "Instance of 'InjectorError'". It now includes the message.
 - Improved: "No provider found" and the missing-factory error name the type (for example `ApiClient`) instead of an internal token string, and the missing-factory error says to register the factory.
+
+## 2.0.2
+
+- Fixed: an optional dependency (any entry in `DependencyDataBuilder.list`, or `namedOptional`) that nothing provides now resolves to `null` instead of crashing.
+- Fixed: `getServiceOrNull` now returns `null` when nothing provides the type, instead of throwing.
+- Fixed: an error thrown while building a dependency deeper in the graph now fails the `getService` future, instead of leaving it waiting forever.
 
 ## 2.0.1
 
