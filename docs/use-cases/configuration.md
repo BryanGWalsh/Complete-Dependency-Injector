@@ -23,7 +23,7 @@ List the tokens as dependencies and read each one with `deps.get<T>(token)`. Use
 <<< @/snippets/lib/configuration.dart#consumer{dart}
 
 ::: info
-Optional dependencies that nothing provides need `complete_dependency_injector` 2.0.2 or later.
+Optional dependencies that nothing provides need `complete_dependency_injector` 2.1.0 or later.
 :::
 
 ## One provider list per environment
