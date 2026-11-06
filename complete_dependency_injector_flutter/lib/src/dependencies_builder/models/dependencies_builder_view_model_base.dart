@@ -27,6 +27,8 @@ abstract class DependencyBuilderViewModelBase {
 
   void updateFromAsyncDependenciesDataChange(bool hasError, [Dependencies? dependencies, List<dynamic>? streamSnapshots]) {
     _state = DependenciesBuilderViewModelStates.resolvingDependencies;
+    // Cleared on every update, so the flag recovers once a stream emits again.
+    _error = hasError;
     if (hasError) {
       _error = true;
       _state = DependenciesBuilderViewModelStates.generalError;

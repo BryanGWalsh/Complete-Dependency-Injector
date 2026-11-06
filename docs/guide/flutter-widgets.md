@@ -41,6 +41,12 @@ Typical places for a scope:
 
 `of` returns `null` when there is no injector above the widget, so make sure an `InjectorRootWidget` or `InjectorScopeWidget` is an ancestor.
 
+## DependenciesBuilder lifecycle
+
+- `DependenciesBuilder` keeps the **first ViewModel** it's given, so creating the ViewModel inline (`cleanViewModelInstance: MyViewModel()`) in a parent's `build` is fine: the parent can rebuild without the ViewModel losing its state or re-listening to its streams.
+- `getListOfStreamsToObserve()` is called once, after the dependencies resolve. Single-subscription streams work, because they're only listened to once.
+- To **start over** with a new ViewModel, give the `DependenciesBuilder` a new `key`.
+
 ## Scope lifecycle
 
 - A scope creates its injector when it's first built and **keeps that injector across rebuilds**, so the instances it caches survive `setState` calls above it.

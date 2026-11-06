@@ -7,6 +7,9 @@
 - Fixed: `setInjectableReadyResult(false)` was ignored and the service was handed out anyway. It now fails resolution with an `InjectorError`.
 - Fixed: a dependency cycle overflowed the stack and crashed the isolate. It now fails with an `InjectorError` that names the cycle.
 - Added: `InjectableWithReadyMixin.setInjectableReadyError(error, [stackTrace])`, so async setup that fails can fail resolution instead of leaving it waiting forever.
+- Fixed: resolving the same `DependencyData` more than once (a factory provided in several scopes, or ViewModels that share a static `DependencyData`) could hand an earlier `Dependencies` result the instances from a later resolution. Each `Dependencies` now keeps its own results.
+- Fixed: `DependencyDataBuilder().named(...)` asserted unless both `required` and `optional` were passed. Either one is now enough.
+- Fixed: the `DependencyDataBuilder.namedRequired` and `DependencyDataBuilder.namedOptional` factories ignored their `safety` argument.
 
 ## 2.0.2
 
