@@ -29,12 +29,17 @@ class InjectorInjectableResolver {
   }
 
   Future<Dependencies> resolveDependencies(DependencyData data) async {
+    // The same DependencyData is resolved by every injector that builds a
+    // factory's type, and by every ViewModel that shares one. Results are kept
+    // per call so one resolution can't overwrite another's instances.
+    final instances = <String, Object?>{};
+    final providedNames = <String, String?>{};
     await Future.wait(data.all.values.map((e) async {
       final instanceContainer = _tryFindOrInstantiateNewInstanceOnCorrectScope(e.tokenString, e.optional);
-      e.providedName = instanceContainer.name;
-      e.instance = await instanceContainer.serviceFuture;
+      providedNames[e.tokenString] = e.providedName = instanceContainer.name;
+      instances[e.tokenString] = e.instance = await instanceContainer.serviceFuture;
     }));
-    return Dependencies(data);
+    return Dependencies(data, instances: instances, providedNames: providedNames);
   }
 
   Future<T> getService<T>([Object? token]) async {

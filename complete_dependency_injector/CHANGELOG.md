@@ -1,3 +1,9 @@
+## 2.0.3
+
+- Fixed: resolving the same `DependencyData` more than once (a factory provided in several scopes, or ViewModels that share a static `DependencyData`) could hand an earlier `Dependencies` result the instances from a later resolution. Each `Dependencies` now keeps its own results.
+- Fixed: `DependencyDataBuilder().named(...)` asserted unless both `required` and `optional` were passed. Either one is now enough.
+- Fixed: the `DependencyDataBuilder.namedRequired` and `DependencyDataBuilder.namedOptional` factories ignored their `safety` argument.
+
 ## 2.0.2
 
 - Fixed: an optional dependency (any entry in `DependencyDataBuilder.list`, or `namedOptional`) that nothing provides now resolves to `null` instead of crashing.

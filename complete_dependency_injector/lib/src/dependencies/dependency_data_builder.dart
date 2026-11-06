@@ -29,7 +29,7 @@ class DependencyDataBuilder {
   }
 
   DependencyDataBuilder named({Map<String, Object>? required, Map<String, Object>? optional}) {
-    assert(required != null && optional != null, "DependencyListBuilder.named must be called with required or optional object maps");
+    assert(required != null || optional != null, "DependencyDataBuilder.named must be called with required or optional object maps");
     if (required != null) namedRequired(required);
     if (optional != null) namedOptional(optional);
     return this;
@@ -49,7 +49,7 @@ class DependencyDataBuilder {
 
   factory DependencyDataBuilder.positional(List<Object> list, {safety = true}) => DependencyDataBuilder(positional: list, safety: safety);
 
-  factory DependencyDataBuilder.namedRequired(Map<String, Object> map, {safety = true}) => DependencyDataBuilder(namedRequired: map);
+  factory DependencyDataBuilder.namedRequired(Map<String, Object> map, {safety = true}) => DependencyDataBuilder(namedRequired: map, safety: safety);
 
   factory DependencyDataBuilder.named({
     Map<String, Object>? required,
@@ -62,7 +62,7 @@ class DependencyDataBuilder {
         safety: safety,
       );
 
-  factory DependencyDataBuilder.namedOptional(Map<String, Object> map, {safety = true}) => DependencyDataBuilder(namedOptional: map);
+  factory DependencyDataBuilder.namedOptional(Map<String, Object> map, {safety = true}) => DependencyDataBuilder(namedOptional: map, safety: safety);
   static DependencyData empty = DependencyDataBuilder(safety: true).done();
   static DependencyData emptyWithoutSafety = DependencyDataBuilder(safety: false).done();
 
