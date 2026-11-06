@@ -8,6 +8,8 @@ Add `InjectableWithReadyMixin`, start the async work in the constructor, and cal
 
 <<< @/snippets/lib/async_services.dart#database{dart}
 
+If setup fails, call `setInjectableReadyError(error, stackTrace)` (or `setInjectableReadyResult(false)`). The `getService` call, and anything that depends on the service, then fails with that error instead of waiting forever, and the next request builds the service again.
+
 ## Depend on it like any other service
 
 `UserRepository` doesn't know or care that `Database` is asynchronous. It just takes one in its constructor.

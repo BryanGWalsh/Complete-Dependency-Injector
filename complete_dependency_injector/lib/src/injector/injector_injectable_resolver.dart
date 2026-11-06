@@ -73,12 +73,6 @@ class InjectorInjectableResolver {
       // An optional dependency that nothing provides resolves to null.
       return InjectorInjectableInstanceScopeContainer(_myId, Future.value(null), unprovided: true);
     }
-    final provider = _providers[provideTokenRep]!;
-
-    if (!provider.shouldHaveFactory && provider.useValue != null) {
-      return injectableInstances[provideTokenRep] = InjectorInjectableInstanceScopeContainer(_myId, Future.value(provider.useValue!), name: provider.name);
-    }
-
     final pathKey = "$_myId:$provideTokenRep";
     final cycleStart = _resolutionPath.indexOf(pathKey);
     if (cycleStart != -1) {
@@ -87,7 +81,7 @@ class InjectorInjectableResolver {
     }
     _resolutionPath.add(pathKey);
     try {
-      return _instantiate(provideTokenRep, provider, optional);
+      return _instantiate(provideTokenRep, _providers[provideTokenRep]!, optional);
     } finally {
       _resolutionPath.removeLast();
     }
@@ -95,11 +89,14 @@ class InjectorInjectableResolver {
 
   InjectorInjectableInstanceScopeContainer _instantiate(String provideTokenRep, ProvideStrategy provider, bool optional) {
     if (provider.useExisting != null) {
-      final target = _tryFindOrInstantiateNewInstanceOnCorrectScope(provider.useExisting!, optional).forReference(name: provider.name);
-      // Don't cache "nothing provides the target": a later required lookup
-      // must still fail.
-      if (target.unprovided) return target;
-      return injectableInstances[provideTokenRep] = target;
+      // Not cached here: the target caches its own instance, so it is disposed
+      // once, a failure can be retried, and "nothing provides the target" is
+      // never remembered for a later required lookup.
+      return _tryFindOrInstantiateNewInstanceOnCorrectScope(provider.useExisting!, optional).forReference(name: provider.name);
+    }
+
+    if (!provider.shouldHaveFactory && provider.useValue != null) {
+      return injectableInstances[provideTokenRep] = InjectorInjectableInstanceScopeContainer(_myId, Future.value(provider.useValue!), name: provider.name);
     }
 
     if (!_factories.containsKey(provideTokenRep)) {
@@ -107,13 +104,16 @@ class InjectorInjectableResolver {
     }
     final factory = _factories[provideTokenRep]!;
     final dependenciesFuture = resolveDependencies(factory.dependencyData);
+    late final InjectorInjectableInstanceScopeContainer container;
+    final serviceFuture = dependenciesFuture.then((Dependencies dependencies) => factory.createInjectable(dependencies)).catchError((Object error, StackTrace stackTrace) {
+      // Don't cache a failure: the next request tries again.
+      if (identical(injectableInstances[provideTokenRep], container)) injectableInstances.remove(provideTokenRep);
+      Error.throwWithStackTrace(error, stackTrace);
+    });
     // The injector that provides the token owns the instance: one per
     // providing injector, disposed with it.
-    return injectableInstances[provideTokenRep] = InjectorInjectableInstanceScopeContainer(
-      _myId,
-      dependenciesFuture.then((Dependencies dependencies) => factory.createInjectable(dependencies)),
-      name: provider.name,
-    );
+    container = InjectorInjectableInstanceScopeContainer(_myId, serviceFuture, name: provider.name);
+    return injectableInstances[provideTokenRep] = container;
   }
 
   Future<void> dispose() async {
@@ -121,7 +121,10 @@ class InjectorInjectableResolver {
     final disposalFutures = <Future<void>>[];
     for (final container in injectableInstances.values) {
       if (container.parentInjectorId == _myId) {
-        disposalFutures.add(container.serviceFuture.then((instance) async {
+        // A service whose creation failed has nothing to dispose; its error
+        // already went to whoever asked for it.
+        final instanceFuture = container.serviceFuture.then<Object?>((instance) => instance, onError: (_) => null);
+        disposalFutures.add(instanceFuture.then((instance) async {
           if (instance is InjectableWithDisposeInterface && instance is! Injector && instance is! InjectorInjectableResolver) {
             await instance.dispose();
           }
