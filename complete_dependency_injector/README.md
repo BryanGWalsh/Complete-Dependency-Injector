@@ -22,9 +22,9 @@ Add the packages to your `pubspec.yaml`:
 ```yaml
 dependencies:
   # Core DI for Dart
-  complete_dependency_injector: ^2.0.0
+  complete_dependency_injector: ^2.0.3
   # Flutter integration (optional)
-  complete_dependency_injector_flutter: ^2.0.0
+  complete_dependency_injector_flutter: ^2.0.3
 ```
 
 Then run `dart pub get` or `flutter pub get`.
